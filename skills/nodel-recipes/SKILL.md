@@ -98,42 +98,7 @@ def cleanup():
 
 ## Network Protocols
 
-See `references/toolkit-api.md` for complete protocol documentation.
-
-### TCP (with auto-reconnect)
-
-```python
-tcp = TCP(dest='192.168.1.100:9999', connected=on_connected, received=on_data)
-
-def on_connected():
-    console.info('Connected to device')
-
-def on_data(data):
-    # Parse device response
-    if 'POWER=' in data:
-        local_event_Power.emit(data.split('=')[1])
-```
-
-### UDP
-
-```python
-udp = UDP(dest='192.168.1.100:9999', received=on_packet)
-udp.send('DISCOVER')
-```
-
-### HTTP
-
-```python
-# Synchronous
-response = get_url('http://api.example.com/status')
-
-# Asynchronous with callback
-get_url('http://api.example.com/command',
-        method='POST',
-        post=json_encode({'action': 'power', 'value': 'on'}),
-        contentType='application/json',
-        complete=on_response)
-```
+TCP, UDP, and HTTP are available via the toolkit. See `references/toolkit-api.md` for complete documentation with examples.
 
 ## Timers
 
@@ -158,15 +123,6 @@ console.info("Blue - informational")
 console.warn("Orange - warning")
 console.error("Red - error")
 ```
-
-**REST API level mapping:** When reading logs via REST API, the `console` field uses different names:
-
-| Method | API Level | Color |
-|--------|-----------|-------|
-| `console.log()` | `out` | Gray |
-| `console.info()` | `info` | Blue |
-| `console.warn()` | `warn` | Orange |
-| `console.error()` | `err` | Red |
 
 ## Common Patterns
 

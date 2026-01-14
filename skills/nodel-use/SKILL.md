@@ -21,15 +21,9 @@ curl "http://localhost:8085/REST/nodes/My%20Node/console?from=0&max=50"
 # Invoke an action
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
   -H "Content-Type: application/json" -d '"On"'
-
-# Restart a node
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart"
-
-# Get node script source
-curl http://localhost:8085/REST/nodes/My%20Node/script/raw
 ```
 
-**Important:** URL-encode node names with spaces (`%20`).
+**Important:** URL-encode node names with spaces (`%20`). See `references/rest-api.md` for all endpoints.
 
 ## REST API Endpoints
 
@@ -104,20 +98,12 @@ Response format:
 # List available actions
 curl http://localhost:8085/REST/nodes/My%20Node/actions
 
-# Get action schema
-curl http://localhost:8085/REST/nodes/My%20Node/actions/Power
-
 # Test action - string argument
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
   -H "Content-Type: application/json" -d '"On"'
-
-# Test action - object argument
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/SetLevel/call" \
-  -H "Content-Type: application/json" -d '{"channel": 1, "value": 50}'
-
-# Test action - no argument
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Refresh/call"
 ```
+
+See `references/debugging.md` for complete debugging workflows.
 
 ### Evaluate Python Expressions
 
@@ -133,15 +119,6 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/exec" \
   -H "Content-Type: text/plain" \
   -d 'console.info("TCP connected: %s" % tcp.isConnected())'
 ```
-
-## Console Message Types
-
-| Level | Color | Purpose |
-|-------|-------|---------|
-| `info` | Blue | Informational messages |
-| `out` | Gray | Verbose/debug output |
-| `warn` | Orange | Warnings |
-| `err` | Red | Errors |
 
 ## Common Issues
 
