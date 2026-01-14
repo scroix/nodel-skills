@@ -8,7 +8,7 @@ Agent skills for working with Nodel - Museums Victoria's distributed digital med
 
 ```bash
 /plugin marketplace add scroix/nodel-skills
-/plugin install scroix@nodel-skills
+/plugin install nodel@nodel-skills
 ```
 
 ### Manual Installation
