@@ -1,0 +1,20 @@
+{
+  "name": "nodel-skills",
+  "owner": {
+    "name": "scroix",
+    "url": "https://github.com/scroix"
+  },
+  "plugins": [
+    {
+      "name": "nodel",
+      "description": "Skills for working with Nodel distributed control framework",
+      "source": "./",
+      "version": "1.0.0",
+      "skills": [
+        "./skills/nodel-recipes",
+        "./skills/nodel-use",
+        "./skills/nodel-frontend"
+      ]
+    }
+  ]
+}
