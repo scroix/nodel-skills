@@ -31,7 +31,7 @@ message = 'Status: %(level)s - %(message)s' % {'level': 0, 'message': 'OK'}
 message = f'Device {name} at port {port}'  # SyntaxError!
 
 # WRONG - .format() (Python 2.6+)
-message = 'Device {} at port {}'.format(name, port)  # May not work reliably
+message = 'Device {} at port {}'.format(name, port)  # AttributeError - method doesn't exist in 2.5
 ```
 
 ### Print Statement
@@ -70,16 +70,25 @@ for key, value in mydict.items():
 # dict.viewitems() does NOT exist
 ```
 
-### No with Statement for Files
+### Limited `with` Statement Support
 
 ```python
-# Instead of with statement, use try/finally
+# The with statement requires a future import in Python 2.5
+from __future__ import with_statement
+
+# Then you can use it
+with open('file.txt') as f:
+    content = f.read()
+
+# Alternative without import - use try/finally
 f = open('file.txt')
 try:
     content = f.read()
 finally:
     f.close()
 ```
+
+**Note:** In Nodel recipes, prefer try/finally for compatibility, or verify `with` works in your Jython version.
 
 ### Class Definitions
 
@@ -101,7 +110,7 @@ class OldStyle:
 my_set = set([1, 2, 3])
 
 # WRONG - Set literals (Python 2.7+)
-my_set = {1, 2, 3}  # This creates a dict!
+my_set = {1, 2, 3}  # SyntaxError in Python 2.5
 ```
 
 ### No Dictionary Comprehensions

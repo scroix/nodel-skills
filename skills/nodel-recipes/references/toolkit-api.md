@@ -159,14 +159,17 @@ event.addEmitHandler(on_emit)
 Receive events from other nodes:
 
 ```python
-# Function receives event data
+# Define handler function with naming convention: remote_event_{Name}
 def remote_event_DisplayStatus(arg):
+    '''Handler called when bound remote event emits'''
     console.info('Display status: %s' % arg)
 
-# With metadata
+# With metadata (handler uses same naming convention)
 remote_event_ProjectorStatus = RemoteEvent({'group': 'Projector'})
-def remote_event_ProjectorStatus_handler(arg):
-    pass
+
+def remote_event_ProjectorStatus(arg):
+    '''Nodel binds this function automatically by name'''
+    console.info('Projector: %s' % arg)
 ```
 
 ## Console Logging

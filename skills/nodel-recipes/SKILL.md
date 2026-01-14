@@ -159,6 +159,15 @@ console.warn("Orange - warning")
 console.error("Red - error")
 ```
 
+**REST API level mapping:** When reading logs via REST API, the `console` field uses different names:
+
+| Method | API Level | Color |
+|--------|-----------|-------|
+| `console.log()` | `out` | Gray |
+| `console.info()` | `info` | Blue |
+| `console.warn()` | `warn` | Orange |
+| `console.error()` | `err` | Red |
+
 ## Common Patterns
 
 ### Device Control with Polling
