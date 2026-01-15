@@ -152,7 +152,7 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/params/save" \
 curl http://localhost:8085/REST/nodes/My%20Node/remote/schema
 
 # Get current bindings
-curl http://localhost:8085/REST/nodes/My%20Node/remote/value
+curl http://localhost:8085/REST/nodes/My%20Node/remote
 # Returns: {"DisplayPower": {"node": "Display Node", "action": "Power"}}
 
 # Save remote bindings

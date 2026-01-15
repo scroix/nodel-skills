@@ -12,10 +12,14 @@ param_port = Parameter({'title': 'Port', 'schema': {'type': 'integer'}, 'default
 
 tcp = None
 
+# Track connection state - must be defined by user and updated in callbacks
+_isConnected = False
+
 def main():
     global tcp
     tcp = TCP(dest='%s:%s' % (param_ipAddress or '0.0.0.0', param_port or 9999),
               connected=on_connected,
+              disconnected=on_disconnected,
               received=on_data)
 
 @after_main
@@ -24,8 +28,15 @@ def setup():
         tcp.setDest('%s:%s' % (param_ipAddress, param_port or 9999))
 
 def on_connected():
+    global _isConnected
+    _isConnected = True
     console.info('Connected')
     poll_status()
+
+def on_disconnected():
+    global _isConnected
+    _isConnected = False
+    console.warn('Disconnected')
 
 def on_data(data):
     if 'POWER=' in data:
