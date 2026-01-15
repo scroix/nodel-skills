@@ -31,7 +31,7 @@ Look for:
 ### 3. Check Parameters
 
 ```bash
-curl http://localhost:8085/REST/nodes/My%20Node/params/value
+curl http://localhost:8085/REST/nodes/My%20Node/params
 ```
 
 Verify:
@@ -56,7 +56,7 @@ curl ".../console?from=0&max=20"
 
 ```bash
 # Check Python variables
-curl ".../eval?expr=tcp.isConnected()"
+curl ".../eval?expr=_isConnected"
 curl ".../eval?expr=param_ipAddress"
 curl ".../eval?expr=local_event_Status.getArg()"
 ```
@@ -93,8 +93,8 @@ curl ".../eval?expr=local_event_Status.getArg()"
 
 **Debugging:**
 ```bash
-# Check connection state
-curl ".../eval?expr=tcp.isConnected()"
+# Check connection state (requires _isConnected variable set by TCP callbacks)
+curl ".../eval?expr=_isConnected"
 
 # Check destination
 curl ".../eval?expr=tcp._dest"
@@ -129,8 +129,8 @@ curl ".../logs?from=0&max=20"
 
 # Add debug logging
 curl -X POST ".../exec" \
-  -H "Content-Type: text/plain" \
-  -d 'console.info("TCP connected: %s, dest: %s" % (tcp.isConnected(), tcp._dest))'
+  -H "Content-Type: application/json" \
+  -d '{"code":"console.info(\"Connection state: %s, dest: %s\" % (_isConnected, tcp._dest))"}'
 ```
 
 **Common causes:**
@@ -151,11 +151,13 @@ curl ".../events/Status"
 
 # Check if emit is being called
 curl -X POST ".../exec" \
-  -d 'console.info("Last emit: %s" % local_event_Status.getArg())'
+  -H "Content-Type: application/json" \
+  -d '{"code":"console.info(\"Last emit: %s\" % local_event_Status.getArg())"}'
 
 # Force emit to test
 curl -X POST ".../exec" \
-  -d 'local_event_Status.emit({"level": 0, "message": "Test"})'
+  -H "Content-Type: application/json" \
+  -d '{"code":"local_event_Status.emit({\"level\": 0, \"message\": \"Test\"})"}'
 ```
 
 **Common causes:**
@@ -175,7 +177,7 @@ curl -X POST ".../exec" \
 curl ".../eval?expr=dir()"  # Look for timer variables
 
 # Manually call poll function
-curl -X POST ".../exec" -d 'poll_status()'
+curl -X POST ".../exec" -H "Content-Type: application/json" -d '{"code":"poll_status()"}'
 ```
 
 **Common causes:**
@@ -193,7 +195,7 @@ curl ".../eval?expr=param_ipAddress"
 
 # Check object properties
 curl ".../eval?expr=tcp._dest"
-curl ".../eval?expr=tcp.isConnected()"
+curl ".../eval?expr=_isConnected"
 
 # Check event state
 curl ".../eval?expr=local_event_Status.getArg()"
@@ -208,24 +210,28 @@ curl ".../eval?expr=_lastReceive"
 
 ## Using Exec for Testing
 
-The `/exec` endpoint runs Python code:
+The `/exec` endpoint runs Python code (requires JSON body with `code` field):
 
 ```bash
 # Log diagnostic info
 curl -X POST ".../exec" \
-  -d 'console.info("TCP state: %s" % tcp.isConnected())'
+  -H "Content-Type: application/json" \
+  -d '{"code":"console.info(\"Connection state: %s\" % _isConnected)"}'
 
 # Manually trigger poll
 curl -X POST ".../exec" \
-  -d 'poll_status()'
+  -H "Content-Type: application/json" \
+  -d '{"code":"poll_status()"}'
 
 # Test emit
 curl -X POST ".../exec" \
-  -d 'local_event_Power.emit("On")'
+  -H "Content-Type: application/json" \
+  -d '{"code":"local_event_Power.emit(\"On\")"}'
 
 # Reset connection
 curl -X POST ".../exec" \
-  -d 'tcp.setDest("%s:%s" % (param_ipAddress, param_port))'
+  -H "Content-Type: application/json" \
+  -d '{"code":"tcp.setDest(\"%s:%s\" % (param_ipAddress, param_port))"}'
 ```
 
 ## Live Log Tailing

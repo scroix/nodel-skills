@@ -1,11 +1,9 @@
 ---
 name: nodel-frontend
-description: Use when building custom frontends, dashboards, or UI for Nodel nodes. Applies to index.xml files, custom.css, custom.js, XSL templates, or any UI component development for Nodel recipes.
+description: Build custom frontends and dashboards for Nodel nodes using index.xml, custom.css, custom.js, and XSL templates. Use when developing UI components for Nodel recipes.
 ---
 
 # Nodel Frontend Development
-
-This skill provides guidance for building custom frontends and dashboards for Nodel nodes.
 
 ## Frontend File Structure
 

@@ -214,6 +214,24 @@ call(setup_connection, 5)
 ### TCP
 
 ```python
+# Track connection state via callbacks
+_isConnected = False
+
+def on_connected():
+    global _isConnected
+    _isConnected = True
+    console.info('TCP connected')
+    poll_status()
+
+def on_disconnected():
+    global _isConnected
+    _isConnected = False
+    console.warn('TCP disconnected')
+
+def on_data(data):
+    # data is string without delimiters
+    console.log('Received: %s' % data)
+
 # Create TCP connection with auto-reconnect
 tcp = TCP(
     dest='192.168.1.100:9999',
@@ -225,17 +243,6 @@ tcp = TCP(
     receiveDelimiters='\r\n'
 )
 
-def on_connected():
-    console.info('TCP connected')
-    poll_status()
-
-def on_disconnected():
-    console.warn('TCP disconnected')
-
-def on_data(data):
-    # data is string without delimiters
-    console.log('Received: %s' % data)
-
 # Send data
 tcp.send('COMMAND\r\n')
 tcp.send('RAW DATA')
@@ -243,9 +250,9 @@ tcp.send('RAW DATA')
 # Change destination
 tcp.setDest('192.168.1.101:9999')
 
-# Check connection
-if tcp.isConnected():
-    pass
+# Check connection state via callback-managed variable
+if _isConnected:
+    tcp.send('STATUS?\r\n')
 
 # Close
 tcp.close()

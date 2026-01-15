@@ -1,11 +1,9 @@
 ---
 name: nodel-use
-description: Use when interacting with running Nodel instances - checking node status, viewing console logs, invoking actions, debugging nodes, or managing nodes via the REST API. Applies to curl commands, API calls, or troubleshooting Nodel deployments.
+description: Interact with running Nodel instances via REST API - check node status, view console logs, invoke actions, debug nodes, manage deployments. Use when making curl commands, API calls, or troubleshooting Nodel.
 ---
 
 # Interacting with Running Nodel Instances
-
-This skill provides guidance for interacting with Nodel via its REST API, debugging nodes, and managing running instances.
 
 ## Quick Reference
 
@@ -20,7 +18,7 @@ curl "http://localhost:8085/REST/nodes/My%20Node/console?from=0&max=50"
 
 # Invoke an action
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
-  -H "Content-Type: application/json" -d '"On"'
+  -H "Content-Type: application/json" -d '{"arg":"On"}'
 ```
 
 **Important:** URL-encode node names with spaces (`%20`). See `references/rest-api.md` for all endpoints.
@@ -52,7 +50,7 @@ Base: `/REST/nodes/{nodeName}/`
 | `/actions/{name}/call` | POST | Invoke action |
 | `/events` | GET | List events |
 | `/events/{name}` | GET | Event metadata + last value |
-| `/params/value` | GET | Current parameters |
+| `/params` | GET | Current parameters |
 | `/script/raw` | GET | Script source |
 | `/restart` | POST | Restart node |
 
@@ -71,7 +69,7 @@ curl "http://localhost:8085/REST/nodes/My%20Node/console?from=0&max=100"
 curl "http://localhost:8085/REST/nodes/My%20Node/logs?from=0&max=50"
 
 # 4. Inspect current parameters
-curl http://localhost:8085/REST/nodes/My%20Node/params/value
+curl http://localhost:8085/REST/nodes/My%20Node/params
 ```
 
 ### Live Log Tailing (Long-Polling)
@@ -100,7 +98,7 @@ curl http://localhost:8085/REST/nodes/My%20Node/actions
 
 # Test action - string argument
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
-  -H "Content-Type: application/json" -d '"On"'
+  -H "Content-Type: application/json" -d '{"arg":"On"}'
 ```
 
 See `references/debugging.md` for complete debugging workflows.
@@ -111,13 +109,13 @@ See `references/debugging.md` for complete debugging workflows.
 # Check variable value
 curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=param_ipAddress"
 
-# Check connection state
-curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=tcp.isConnected()"
+# Check connection state (requires _isConnected variable set by TCP callbacks)
+curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=_isConnected"
 
 # Execute diagnostic code
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/exec" \
-  -H "Content-Type: text/plain" \
-  -d 'console.info("TCP connected: %s" % tcp.isConnected())'
+  -H "Content-Type: application/json" \
+  -d '{"code":"console.info(\"Connection state: %s\" % _isConnected)"}'
 ```
 
 ## Common Issues
@@ -159,7 +157,7 @@ curl -X POST "http://localhost:8085/REST/newNode?base=recipes/device-control&nam
 
 ```bash
 # Get current values
-curl http://localhost:8085/REST/nodes/My%20Node/params/value
+curl http://localhost:8085/REST/nodes/My%20Node/params
 
 # Save new values
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/params/save" \
@@ -184,6 +182,6 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true"
 
 1. **URL-encode node names** - Spaces become `%20`
 2. **Use `?trace` for debugging** - Adds stack traces to error responses
-3. **Action arguments** - Strings need quotes: `-d '"On"'`
+3. **Action arguments** - Wrap in JSON object: `-d '{"arg":"On"}'`
 4. **Long-poll timeout** - Use 5000-10000ms for log tailing
 5. **Check restart completion** - Use `/hasRestarted?timestamp={before}&timeout=5000`

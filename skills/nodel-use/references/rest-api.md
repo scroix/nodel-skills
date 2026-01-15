@@ -106,12 +106,12 @@ curl http://localhost:8085/REST/nodes/My%20Node/actions/Power
 # Invoke action with string argument
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
   -H "Content-Type: application/json" \
-  -d '"On"'
+  -d '{"arg":"On"}'
 
 # Invoke action with object argument
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/SetLevel/call" \
   -H "Content-Type: application/json" \
-  -d '{"channel": 1, "value": 75}'
+  -d '{"arg":{"channel": 1, "value": 75}}'
 
 # Invoke action with no argument
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Refresh/call"
@@ -136,7 +136,7 @@ curl http://localhost:8085/REST/nodes/My%20Node/events/Status
 curl http://localhost:8085/REST/nodes/My%20Node/params/schema
 
 # Get current parameter values
-curl http://localhost:8085/REST/nodes/My%20Node/params/value
+curl http://localhost:8085/REST/nodes/My%20Node/params
 # Returns: {"ipAddress": "192.168.1.100", "port": 9999}
 
 # Save parameter values
@@ -175,12 +175,12 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/script/save" \
 
 # Evaluate Python expression
 curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=param_ipAddress"
-curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=tcp.isConnected()"
+curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=_isConnected"
 
 # Execute Python code
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/exec" \
-  -H "Content-Type: text/plain" \
-  -d 'console.info("Debug: %s" % param_ipAddress)'
+  -H "Content-Type: application/json" \
+  -d '{"code":"console.info(\"Debug: %s\" % param_ipAddress)"}'
 ```
 
 ### Node Management
@@ -203,8 +203,8 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true"
 
 ```bash
 # List node files
-curl http://localhost:8085/REST/nodes/My%20Node/files/list
-# Returns: ["script.py", "index.xml", "custom.css"]
+curl http://localhost:8085/REST/nodes/My%20Node/files
+# Returns: [{"path": "script.py", "modified": "..."}, ...]
 
 # Get file content
 curl "http://localhost:8085/REST/nodes/My%20Node/files/contents?path=custom.css"
