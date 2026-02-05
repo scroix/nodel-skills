@@ -11,10 +11,14 @@ A node's frontend is defined in its folder:
 
 ```
 nodes/My Node/
-├── script.py      # Node logic
-├── index.xml      # Frontend definition
-├── custom.css     # Custom styles (optional)
-└── custom.js      # Custom JavaScript (optional)
+├── script.py              # Node logic
+├── nodeConfig.json        # Node config and bindings
+└── content                # Web root
+    ├── index.xml          # Frontend definition
+    ├── css
+    |   └── custom.css     # Custom styles (optional)
+    └── js
+        └── custom.js      # Custom JavaScript (optional)
 ```
 
 ## Basic Dashboard Structure
