@@ -1,38 +1,36 @@
-# nodel-skills
-
-Agent skills for working with Nodel - Museums Victoria's distributed digital media control framework.
+A collection of [Agent Skills](https://agentskills.io/home) for working with Nodel.
 
 ## Installation
 
-### Claude Code
+### Option 1: CLI Install (Recommended)
+
+Use [npx skills](https://skills.sh) to open an interactive installer and choose the skills you want:
+
+```bash
+npx skills add scroix/nodel-skills
+```
+
+### Option 2: Claude Code Plugin
 
 ```bash
 /plugin marketplace add scroix/nodel-skills
 /plugin install nodel@nodel-skills
 ```
 
-### Manual Installation
+### Option 3: Manual Installation
+
+#### Claude Code
 
 Copy the `skills/` directory to your `.claude/skills/` folder.
+
+#### Codex CLI
+
+Copy the `skills/` directory to your Codex skills directory: `$CODEX_HOME/skills` (typically `~/.codex/skills`).
 
 ## Available Skills
 
 | Skill | Description |
 |-------|-------------|
-| `nodel-recipes` | Write Nodel node recipes using Jython 2.5 with the toolkit API |
-| `nodel-use` | Interact with running Nodel instances via REST API |
-| `nodel-frontend` | Build custom frontends and dashboards for Nodel nodes |
-
-## About Nodel
-
-Nodel is an open-source digital media control system designed for museums, galleries, and corporate environments. It provides a distributed, node-based architecture for controlling programmable devices across a network.
-
-Key technologies:
-- **Core**: Java 11+ with Jython 2.5.4 scripting
-- **Web UI**: Bootstrap-based with XSL templates
-- **Discovery**: Multicast DNS for automatic node discovery
-- **API**: REST endpoints for programmatic access
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
+| [`nodel-recipes`](skills/nodel-recipes/) | Write Nodel node recipes using Jython 2.5 with the toolkit API |
+| [`nodel-use`](skills/nodel-use/) | Interact with running Nodel instances via REST API |
+| [`nodel-frontend`](skills/nodel-frontend/) | Build custom frontends and dashboards for Nodel nodes |
