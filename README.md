@@ -39,6 +39,26 @@ Copy the `skills/` directory to your Codex skills directory: `$CODEX_HOME/skills
 | `nodel-use` | Interact with running Nodel instances via REST API |
 | `nodel-frontend` | Build custom frontends and dashboards for Nodel nodes |
 
+## Repository Structure
+
+Each skill directory follows the Agent Skills format with a required `SKILL.md` plus optional resource folders.
+
+```text
+nodel-skills/
+├── skills/
+│   ├── nodel-recipes/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── nodel-use/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── nodel-frontend/
+│       ├── SKILL.md
+│       └── references/
+└── .claude-plugin/
+    └── marketplace.json
+```
+
 ## About Nodel
 
 Nodel is an open-source digital media control system designed for museums, galleries, and corporate environments. It provides a distributed, node-based architecture for controlling programmable devices across a network.
