@@ -1,6 +1,6 @@
-Agent skills for working with Nodel - Museums Victoria's distributed digital media control framework.
+Agent skills for developing, operating, and troubleshooting Nodel nodes.
 
-These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code and Codex CLI.
+Built on the [Agent Skills specification](https://agentskills.io/specification) for compatibility with Claude Code and Codex CLI.
 
 ## Installation
 
@@ -40,18 +40,6 @@ Copy the `skills/` directory to your Codex skills directory: `$CODEX_HOME/skills
 
 | Skill | Description |
 |-------|-------------|
-| `nodel-recipes` | Write Nodel node recipes using Jython 2.5 with the toolkit API |
-| `nodel-use` | Interact with running Nodel instances via REST API |
-| `nodel-frontend` | Build custom frontends and dashboards for Nodel nodes |
-
-## Repository Structure
-
-Each directory under `skills/` follows the Agent Skills format.
-
-```text
-skills/[skill-name]/
-├── SKILL.md      - Required instructions and trigger metadata
-├── scripts/      - Optional executable utilities
-├── references/   - Optional domain/reference docs
-└── assets/       - Optional templates and bundled files
-```
+| [`nodel-recipes`](skills/nodel-recipes/) | Write Nodel node recipes using Jython 2.5 with the toolkit API |
+| [`nodel-use`](skills/nodel-use/) | Interact with running Nodel instances via REST API |
+| [`nodel-frontend`](skills/nodel-frontend/) | Build custom frontends and dashboards for Nodel nodes |
