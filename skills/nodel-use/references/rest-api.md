@@ -23,6 +23,15 @@ curl http://localhost:8085/REST/nodes
 # Get all discovered nodes on network
 curl http://localhost:8085/REST/allNodes
 # Returns nodes from all Nodel hosts on the multicast group
+
+# Discovery service state
+curl http://localhost:8085/REST/discovery
+
+# Advertised node URLs (optional text filter)
+curl "http://localhost:8085/REST/nodeURLs?filter=Display"
+
+# Advertised URLs for a specific node name
+curl "http://localhost:8085/REST/nodeURLsForNode?name=Display%20Node"
 ```
 
 ### Framework Logs
@@ -46,6 +55,9 @@ curl http://localhost:8085/REST/diagnostics
 
 # Python toolkit reference
 curl http://localhost:8085/REST/toolkit
+
+# Host startup timestamp
+curl http://localhost:8085/REST/started
 ```
 
 ### Recipe Management
@@ -275,4 +287,6 @@ Add `?trace` to any endpoint for full stack traces in error responses.
 | `from` | console, logs, activity | Start sequence number |
 | `max` | console, logs | Maximum entries to return |
 | `timeout` | console, logs | Long-poll timeout in ms |
+| `filter` | `nodeURLs` | Optional string filter |
+| `name` | `nodeURLsForNode` | Node name lookup |
 | `trace` | Any | Include stack traces in errors |

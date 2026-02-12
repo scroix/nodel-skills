@@ -33,6 +33,10 @@ See `references/rest-api.md` for complete endpoint reference.
 |----------|--------|---------|
 | `/REST/nodes` | GET | Map of all nodes |
 | `/REST/allNodes` | GET | Discovered nodes on network |
+| `/REST/discovery` | GET | Discovery service state |
+| `/REST/nodeURLs` | GET | Advertised node URLs (`?filter=` optional) |
+| `/REST/nodeURLsForNode` | GET | Advertised URLs for one node (`?name=`) |
+| `/REST/started` | GET | Host startup timestamp |
 | `/REST/logs` | GET | Framework logs |
 | `/REST/diagnostics` | GET | System diagnostics |
 | `/REST/recipes/list` | GET | Available node recipes |

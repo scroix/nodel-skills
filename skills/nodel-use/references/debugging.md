@@ -15,6 +15,21 @@ If node is missing:
 - Look for script.py syntax errors (node won't load)
 - Check framework logs for startup errors
 
+### 1b. Check Discovery and Advertised URLs
+
+```bash
+# Discovery service state
+curl http://localhost:8085/REST/discovery
+
+# All advertised node URLs
+curl "http://localhost:8085/REST/nodeURLs"
+
+# One node's advertised URLs
+curl "http://localhost:8085/REST/nodeURLsForNode?name=My%20Node"
+```
+
+Use this when a node appears locally but remote bindings cannot resolve it on the network.
+
 ### 2. Check Console Output
 
 ```bash
