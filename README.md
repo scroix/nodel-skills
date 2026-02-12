@@ -1,31 +1,23 @@
-A collection of [Agent Skills](https://agentskills.io/home) for working with Nodel.
+Agent Skills for use with [Nodel](https://nodel.io/).
+
+These skills follow the [Agent Skills](https://agentskills.io/home) specification so they can be used by any skills-compatible agent.
 
 ## Installation
 
-### Option 1: CLI Install (Recommended)
+### [npx skills](https://skills.sh) (Recommended)
 
-Use [npx skills](https://skills.sh) to open an interactive installer and choose the skills you want:
+> a multi-agent installer (Claude Code, Codex CLI, Cursor, OpenCode, and others).
 
 ```bash
 npx skills add scroix/nodel-skills
 ```
 
-### Option 2: Claude Code Plugin
+### Claude Code Plugin
 
 ```bash
 /plugin marketplace add scroix/nodel-skills
 /plugin install nodel@nodel-skills
 ```
-
-### Option 3: Manual Installation
-
-#### Claude Code
-
-Copy the `skills/` directory to your `.claude/skills/` folder.
-
-#### Codex CLI
-
-Copy the `skills/` directory to your Codex skills directory: `$CODEX_HOME/skills` (typically `~/.codex/skills`).
 
 ## Available Skills
 
