@@ -2,6 +2,8 @@
 
 Agent skills for working with Nodel - Museums Victoria's distributed digital media control framework.
 
+These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code and Codex CLI.
+
 ## Installation
 
 ### Claude Code
@@ -13,7 +15,13 @@ Agent skills for working with Nodel - Museums Victoria's distributed digital med
 
 ### Manual Installation
 
+#### Claude Code
+
 Copy the `skills/` directory to your `.claude/skills/` folder.
+
+#### Codex CLI
+
+Copy the `skills/` directory to your Codex skills directory: `$CODEX_HOME/skills` (typically `~/.codex/skills`).
 
 ## Available Skills
 
