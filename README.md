@@ -4,24 +4,29 @@ These skills follow the [Agent Skills specification](https://agentskills.io/spec
 
 ## Installation
 
-### Claude Code
+### Option 1: CLI Install (Recommended)
+
+Use [npx skills](https://github.com/vercel-labs/skills) to install directly:
+
+```bash
+# Install all skills from this repository
+npx skills add scroix/nodel-skills
+
+# Install specific skills
+npx skills add scroix/nodel-skills --skill nodel-recipes nodel-use nodel-frontend
+
+# List available skills
+npx skills add scroix/nodel-skills --list
+```
+
+### Option 2: Claude Code Plugin
 
 ```bash
 /plugin marketplace add scroix/nodel-skills
 /plugin install nodel@nodel-skills
 ```
 
-### npx skills
-
-Install individual skills directly from this repo:
-
-```bash
-npx skills add https://github.com/scroix/nodel-skills --skill nodel-recipes
-npx skills add https://github.com/scroix/nodel-skills --skill nodel-use
-npx skills add https://github.com/scroix/nodel-skills --skill nodel-frontend
-```
-
-### Manual Installation
+### Option 3: Manual Installation
 
 #### Claude Code
 
