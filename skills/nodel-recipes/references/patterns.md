@@ -105,6 +105,63 @@ def mark_received():
     _lastReceive = system_clock()
 ```
 
+### Adaptive Polling and State Enforcement
+
+```python
+_desiredPower = None
+_settleTimer = Timer(lambda: enforce_state(), 5, stopped=True)
+_idleTimer = Timer(lambda: poll_status(), 60)
+
+def set_desired_power(value):
+    global _desiredPower
+    _desiredPower = value
+    _idleTimer.setInterval(5)            # poll faster while transitioning
+    _settleTimer.setDelayAndInterval(10, 10)
+    _settleTimer.start()
+    send_power(value)
+
+def enforce_state():
+    actual = local_event_Power.getArg()
+    if _desiredPower is None:
+        _settleTimer.stop()
+        return
+    if actual != _desiredPower:
+        send_power(_desiredPower)        # retry until match
+    else:
+        _idleTimer.setInterval(60)       # back to idle polling
+        _settleTimer.stop()
+```
+
+### Raw Socket / Binary Protocol
+
+```python
+import socket
+import struct
+
+def send_binary(ip, port, command, value):
+    # Example packet: 1 byte command + 2 byte big-endian value
+    payload = struct.pack('>BH', command, value)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(2)
+    try:
+        s.connect((ip, port))
+        s.sendall(payload)
+        return s.recv(32)
+    finally:
+        s.close()
+```
+
+### Java Interop Imports
+
+```python
+from java.io import File
+from org.nodel.io import Stream
+
+def read_text(path):
+    f = File(path)
+    return Stream.readFully(f)
+```
+
 ## HTTP API Integration
 
 ### JSON-RPC Pattern
@@ -236,7 +293,7 @@ _process = None
 
 local_event_Running = LocalEvent({'schema': {'type': 'boolean'}})
 
-@local_action
+@local_action({})
 def Start(arg=None):
     '''{"group": "Control"}'''
     global _process
@@ -250,7 +307,7 @@ def Start(arg=None):
                        stopped=on_stopped)
     local_event_Running.emit(True)
 
-@local_action
+@local_action({})
 def Stop(arg=None):
     '''{"group": "Control"}'''
     global _process

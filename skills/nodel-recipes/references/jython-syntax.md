@@ -37,13 +37,13 @@ message = 'Device {} at port {}'.format(name, port)  # AttributeError - method d
 ### Print Statement
 
 ```python
-# CORRECT - Use console methods
+# Works and appears as gray "out" lines in Nodel console
+print 'legacy style'
+print('function style')
+
+# Preferred for severity-aware logging
 console.info('Message here')
 console.log('Debug message')
-
-# Avoid print (behavior varies)
-print 'old style'  # Python 2 syntax
-print('function style')  # Works but prefer console
 ```
 
 ### Integer Division
@@ -89,6 +89,18 @@ finally:
 ```
 
 **Note:** In Nodel recipes, prefer try/finally for compatibility, or verify `with` works in your Jython version.
+
+### Exception Introspection
+
+```python
+import sys
+
+try:
+    do_work()
+except:
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    console.error('Failed: %s' % exc_value)
+```
 
 ### Class Definitions
 
@@ -149,6 +161,7 @@ def process(x):
 
 - `len()`, `range()`, `enumerate()`
 - `str()`, `int()`, `float()`, `bool()`
+- `long()` (useful for Java interop values)
 - `list()`, `dict()`, `tuple()`, `set()`
 - `map()`, `filter()`, `reduce()` (reduce is built-in)
 - `sorted()`, `reversed()`
@@ -166,6 +179,16 @@ text = json_encode({'key': 'value'})
 
 # Don't try to import json module
 ```
+
+### Common Standard Modules
+
+```python
+import re
+import socket
+import struct
+```
+
+These are available in Jython and commonly used in Nodel recipes.
 
 ### Avoid / Unavailable
 
@@ -209,6 +232,9 @@ del items[0]
 ### String Operations
 
 ```python
+# Unicode string literal
+title = u'Delta steps'
+
 # Split and join
 parts = 'a,b,c'.split(',')
 result = ','.join(parts)

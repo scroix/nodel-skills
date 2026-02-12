@@ -57,14 +57,14 @@ param_config = Parameter({
 Commands this node exposes:
 
 ```python
-# Decorator style with schema
+# Decorator style
 @local_action({'schema': {'type': 'string', 'enum': ['On', 'Off']}})
 def power(arg):
     '''{"group": "Power", "order": 1}'''
     tcp.send('POWER %s\r\n' % arg)
 
 # No argument action
-@local_action
+@local_action({})
 def refresh(arg=None):
     '''{"group": "Status"}'''
     poll_status()
@@ -81,7 +81,14 @@ def setLevel(arg):
     channel = arg.get('channel', 1)
     value = arg.get('value', 0)
     tcp.send('LEVEL %d %d\r\n' % (channel, value))
+
+# Naming-convention style (equivalent)
+def local_action_PowerOn(arg=None):
+    '''{"title":"On", "group":"Power"}'''
+    tcp.send('POWER ON\r\n')
 ```
+
+Both decorator style and `local_action_{Name}` naming convention are valid.
 
 ### Dynamic Action Creation
 
@@ -95,6 +102,10 @@ action = create_local_action('Preset 1',
 existing = lookup_local_action('Preset 1')
 if existing:
     existing.call(None)
+    last_called = existing.getTimestamp()
+
+# Legacy alias (still supported in existing recipes)
+Action('Preset 2', lambda arg: activate_preset(2), {'group': 'Presets'})
 ```
 
 ### Remote Actions
@@ -110,6 +121,16 @@ remote_action_DisplayPower.call('On')
 
 # With metadata
 remote_action_ProjectorPower = RemoteAction({'group': 'Projector'})
+
+# Create remote action dynamically (optionally suggest binding target)
+remote_action_DynPower = create_remote_action(
+    'DynPower',
+    {'group': 'Projector'},
+    suggestedNode='Display Node',
+    suggestedAction='Power')
+
+# Lookup by name
+same_action = lookup_remote_action('DynPower')
 ```
 
 ## Events
@@ -122,6 +143,9 @@ State this node emits:
 # Simple event
 local_event_Power = LocalEvent({'schema': {'type': 'string'}})
 local_event_Power.emit('On')
+
+# Alias for event creation
+signal = Signal('Heartbeat', {'group': 'Status'})
 
 # Object event
 local_event_Status = LocalEvent({
@@ -137,6 +161,7 @@ local_event_Status.emit({'level': 0, 'message': 'OK'})
 
 # Get current value
 current = local_event_Status.getArg()
+last_update = local_event_Status.getTimestamp()
 
 # Emit only if different
 local_event_Power.emitIfDifferent('On')
@@ -152,6 +177,9 @@ event = create_local_event('Channel 1 Level',
 def on_emit(value):
     console.info('Channel 1 changed to %s' % value)
 event.addEmitHandler(on_emit)
+
+# Legacy alias (still supported)
+legacy_event = Event('Channel 2 Level', {'group': 'Channels'})
 ```
 
 ### Remote Events
@@ -164,12 +192,21 @@ def remote_event_DisplayStatus(arg):
     '''Handler called when bound remote event emits'''
     console.info('Display status: %s' % arg)
 
-# With metadata (handler uses same naming convention)
-remote_event_ProjectorStatus = RemoteEvent({'group': 'Projector'})
-
+# With metadata via docstring JSON
 def remote_event_ProjectorStatus(arg):
-    '''Nodel binds this function automatically by name'''
+    '''{"group":"Projector"}'''
     console.info('Projector: %s' % arg)
+
+# Decorator style
+@remote_event({'group': 'Projector'}, suggestedNode='Display Node', suggestedEvent='Status')
+def DisplayStatus2(arg):
+    console.info('Display status 2: %s' % arg)
+
+# Runtime creation
+create_remote_event('DynStatus', lambda arg: console.info(arg),
+    {'group': 'Projector'}, suggestedNode='Display Node', suggestedEvent='Status')
+
+event_ref = lookup_remote_event('DynStatus')
 ```
 
 ## Console Logging
@@ -200,6 +237,14 @@ poller = Timer(poll, 30, stopped=True)
 poller.start()
 poller.stop()
 poller.setInterval(60)  # Change interval
+poller.setDelayAndInterval(5, 30)
+poller.reset()
+
+# Read timer state
+delay_s = poller.getDelay()
+interval_s = poller.getInterval()
+running = poller.isStarted()
+stopped = poller.isStopped()
 ```
 
 ### One-time Call
@@ -207,6 +252,24 @@ poller.setInterval(60)  # Change interval
 ```python
 # Execute after 5 seconds
 call(setup_connection, 5)
+
+# Execute thread-safe callback
+call_safe(refresh_ui, 0.25)
+```
+
+### Request Queue
+
+```python
+queue = request_queue(
+    received=lambda arg: console.info('Received: %s' % arg),
+    sent=lambda: console.log('Sent'),
+    timeout=lambda: console.warn('Timeout'))
+
+# Send request and wait for next received packet
+queue.request(lambda: udp.send('?'), lambda arg: console.info('Reply: %s' % arg))
+
+# From protocol callback:
+# queue.handle((source, data))
 ```
 
 ## Network Protocols
@@ -232,13 +295,20 @@ def on_data(data):
     # data is string without delimiters
     console.log('Received: %s' % data)
 
+def on_sent(data):
+    console.log('Sent: %s' % data)
+
+def on_timeout():
+    console.warn('TCP timeout')
+
 # Create TCP connection with auto-reconnect
 tcp = TCP(
     dest='192.168.1.100:9999',
     connected=on_connected,
     disconnected=on_disconnected,
     received=on_data,
-    timeout=30,
+    sent=on_sent,
+    timeout=on_timeout,
     sendDelimiters='\r\n',
     receiveDelimiters='\r\n'
 )
@@ -246,6 +316,15 @@ tcp = TCP(
 # Send data
 tcp.send('COMMAND\r\n')
 tcp.send('RAW DATA')
+
+# Configure connection / receive timeout (milliseconds)
+tcp.setTimeout(30000)
+
+# Request/response queue helpers
+tcp.request('STATUS?\r\n', lambda resp: console.info('STATUS: %s' % resp))
+resp = tcp.requestWaitAndReceive('STATUS?\r\n')
+tcp.receive(lambda resp: console.info('Unsolicited: %s' % resp))
+tcp.clearQueue()
 
 # Change destination
 tcp.setDest('192.168.1.101:9999')
@@ -274,6 +353,25 @@ udp.send('DISCOVER')
 udp.close()
 ```
 
+### SSH
+
+```python
+def on_ssh_data(data):
+    console.info('SSH: %s' % data)
+
+ssh = SSH(
+    dest='192.168.1.150:22',
+    username='admin',
+    password='secret',
+    received=on_ssh_data,
+    sendDelimiters='\n',
+    receiveDelimiters='\n'
+)
+
+ssh.send('show version')
+ssh.close()
+```
+
 ### HTTP
 
 ```python
@@ -292,14 +390,15 @@ response = get_url('http://api.example.com/api',
     post=json_encode({'action': 'power', 'value': 'on'}),
     contentType='application/json')
 
-# Asynchronous with callback
-get_url('http://api.example.com/status',
-    complete=on_response,
-    timeout=10)
+# Timeouts are connectTimeout/readTimeout (seconds)
+response = get_url('http://api.example.com/status',
+    connectTimeout=5,
+    readTimeout=10)
 
-def on_response(response):
-    data = json_decode(response)
-    console.info('Status: %s' % data)
+# Include response metadata + headers
+full = get_url('http://api.example.com/status', fullResponse=True)
+console.info('HTTP status: %s %s' % (full.statusCode, full.reason))
+body = full.content
 
 # With headers
 get_url('http://api.example.com/api',
@@ -309,6 +408,10 @@ get_url('http://api.example.com/api',
 get_url('http://api.example.com/api',
     username='user',
     password='pass')
+
+# Optional HTTP client settings (set before first request)
+_toolkit.getHttpClient().setProxy('proxy.host:8080', None, None)
+_toolkit.getHttpClient().setIgnoreSSL(True)
 ```
 
 ## Process Management
@@ -377,6 +480,9 @@ parsed = date_parse('2024-01-15T10:30:00')
 
 # System clock (milliseconds since epoch)
 millis = system_clock()
+
+# Create datetime from epoch milliseconds
+instant = date_instant(millis)
 ```
 
 ### String Utilities
@@ -388,6 +494,18 @@ if is_blank(value):
 
 # Safe string conversion
 text = str(value) if value is not None else ''
+
+# Collection helpers
+if is_empty([]):
+    pass
+
+# Constant empty value for comparisons
+if value == EMPTY:
+    pass
+
+# Deep equality comparison
+if same_value(obj_a, obj_b):
+    pass
 ```
 
 ### Sequence Generator
@@ -400,6 +518,11 @@ order = next_seq()
 ## Lifecycle Decorators
 
 ```python
+@before_main
+def bootstrap():
+    '''Called before main().'''
+    console.info('Bootstrapping...')
+
 def main():
     '''Called when node starts, before parameters are loaded.'''
     console.info('Node starting')
@@ -424,4 +547,13 @@ if param_ipAddress is not None and len(param_ipAddress) > 0:
 
 # Get node name
 name = _node.getName()
+
+# Lookup parameter dynamically
+ip = lookup_parameter('ipAddress')
+
+# Dynamic node creation
+child = Node('Temporary Child')
+sub = Subnode('Diagnostics')
+release_node(child)
+release_node(sub)
 ```

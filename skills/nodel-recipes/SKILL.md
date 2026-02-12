@@ -51,6 +51,9 @@ def power(arg):
     tcp.send('POWER %s\r\n' % arg)
 ```
 
+Alternative pattern:
+- Naming convention also works: `def local_action_PowerOn(arg=None): ...`
+
 ### Local Events
 
 State this node emits (can be bound by other nodes):
@@ -170,7 +173,7 @@ def build_presets():
 ## Error Handling
 
 ```python
-@local_action
+@local_action({})
 def riskyOperation(arg):
     try:
         result = perform_operation(arg)
