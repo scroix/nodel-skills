@@ -1,4 +1,4 @@
-A collection of [Agent Skills](https://agentskills.io/specification) for working with Nodel.
+A collection of [Agent Skills](https://agentskills.io/home) for working with Nodel.
 
 ## Installation
 
