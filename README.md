@@ -6,17 +6,10 @@ Built on the [Agent Skills specification](https://agentskills.io/specification) 
 
 ### Option 1: CLI Install (Recommended)
 
-Use [npx skills](https://github.com/vercel-labs/skills) to install directly:
+Use [npx skills](https://github.com/vercel-labs/skills) to open an interactive installer and choose the skills you want:
 
 ```bash
-# Install all skills from this repository
 npx skills add scroix/nodel-skills
-
-# Install specific skills
-npx skills add scroix/nodel-skills --skill nodel-recipes nodel-use nodel-frontend
-
-# List available skills
-npx skills add scroix/nodel-skills --list
 ```
 
 ### Option 2: Claude Code Plugin
