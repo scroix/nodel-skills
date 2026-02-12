@@ -1,5 +1,3 @@
-# nodel-skills
-
 Agent skills for working with Nodel - Museums Victoria's distributed digital media control framework.
 
 These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code and Codex CLI.
@@ -11,6 +9,16 @@ These skills follow the [Agent Skills specification](https://agentskills.io/spec
 ```bash
 /plugin marketplace add scroix/nodel-skills
 /plugin install nodel@nodel-skills
+```
+
+### npx skills
+
+Install individual skills directly from this repo:
+
+```bash
+npx skills add https://github.com/scroix/nodel-skills --skill nodel-recipes
+npx skills add https://github.com/scroix/nodel-skills --skill nodel-use
+npx skills add https://github.com/scroix/nodel-skills --skill nodel-frontend
 ```
 
 ### Manual Installation
@@ -40,7 +48,3 @@ Key technologies:
 - **Web UI**: Bootstrap-based with XSL templates
 - **Discovery**: Multicast DNS for automatic node discovery
 - **API**: REST endpoints for programmatic access
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
