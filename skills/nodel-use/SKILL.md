@@ -146,11 +146,13 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/exec" \
 ### Create Node from Recipe
 
 ```bash
-# List recipes
+# List recipes (returns objects with 'path', 'modified', etc.)
 curl http://localhost:8085/REST/recipes/list
 
-# Create node
-curl -X POST "http://localhost:8085/REST/newNode?base=recipes/device-control&name=New%20Node"
+# Create node from a recipe path
+curl -X POST "http://localhost:8085/REST/newNode?base=nodel-official-recipes/PJLink" \
+  -H "Content-Type: application/json" \
+  -d '{"value":"New Node"}'
 ```
 
 ### Update Node Parameters
@@ -169,19 +171,25 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/params/save" \
 
 ```bash
 # Restart
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Rename
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename?newName=New%20Name"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename?newName=New%20Name" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Delete (requires confirmation)
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 ## Tips
 
 1. **URL-encode node names** - Spaces become `%20`
 2. **Use `?trace` for debugging** - Adds stack traces to error responses
-3. **Action arguments** - Wrap in JSON object: `-d '{"arg":"On"}'`
+3. **POST payloads** - Send JSON for POST endpoints (`-d '{}'` if no explicit payload)
 4. **Long-poll timeout** - Use 5000-10000ms for log tailing
 5. **Check restart completion** - Use `/hasRestarted?timestamp={before}&timeout=5000`

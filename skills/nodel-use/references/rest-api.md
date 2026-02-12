@@ -8,6 +8,9 @@ Default: `http://localhost:8085`
 
 The port can be configured with `-p` flag when starting Nodel.
 
+For `POST` endpoints, send JSON in the request body. If there is no explicit payload,
+send an empty object (`-d '{}'`) to avoid request parsing errors.
+
 ## Host-Level Endpoints
 
 ### Node Discovery
@@ -50,10 +53,12 @@ curl http://localhost:8085/REST/toolkit
 ```bash
 # List available recipes
 curl http://localhost:8085/REST/recipes/list
-# Returns: ["recipes/device-control", "recipes/http-api", ...]
+# Returns: [{"path":"nodel-official-recipes/PJLink", "modified":"..."}, ...]
 
 # Create node from recipe
-curl -X POST "http://localhost:8085/REST/newNode?base=recipes/device-control&name=My%20New%20Node"
+curl -X POST "http://localhost:8085/REST/newNode?base=nodel-official-recipes/PJLink" \
+  -H "Content-Type: application/json" \
+  -d '{"value":"My New Node"}'
 ```
 
 ## Node-Level Endpoints
@@ -114,7 +119,9 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/SetLevel/call" 
   -d '{"arg":{"channel": 1, "value": 75}}'
 
 # Invoke action with no argument
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Refresh/call"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Refresh/call" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 ### Events
@@ -187,16 +194,22 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/exec" \
 
 ```bash
 # Restart node
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Check if restarted (for waiting after restart)
 curl "http://localhost:8085/REST/nodes/My%20Node/hasRestarted?timestamp=1705312200000&timeout=5000"
 
 # Rename node
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename?newName=New%20Name"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename?newName=New%20Name" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Delete node (requires confirmation)
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 ### File Management
@@ -215,7 +228,9 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/files/save?path=custom.
   --data-binary @custom.css
 
 # Delete file
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/files/delete?path=old-file.txt"
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/files/delete?path=old-file.txt" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 ## WebSocket API

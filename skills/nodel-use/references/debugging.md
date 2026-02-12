@@ -46,7 +46,9 @@ Verify:
 curl http://localhost:8085/REST/nodes/My%20Node/actions
 
 # Call a simple action
-curl -X POST ".../actions/Refresh/call"
+curl -X POST ".../actions/Refresh/call" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Check console for results
 curl ".../console?from=0&max=20"
@@ -270,7 +272,9 @@ curl http://localhost:8085/REST/diagnostics
 
 ```bash
 # Restart single node
-curl -X POST ".../restart"
+curl -X POST ".../restart" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Wait for restart to complete
 curl ".../hasRestarted?timestamp=$(date +%s)000&timeout=10000"
