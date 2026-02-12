@@ -55,13 +55,3 @@ skills/[skill-name]/
 ├── references/   - Optional domain/reference docs
 └── assets/       - Optional templates and bundled files
 ```
-
-## About Nodel
-
-Nodel is an open-source digital media control system designed for museums, galleries, and corporate environments. It provides a distributed, node-based architecture for controlling programmable devices across a network.
-
-Key technologies:
-- **Core**: Java 11+ with Jython 2.5.4 scripting
-- **Web UI**: Bootstrap-based with XSL templates
-- **Discovery**: Multicast DNS for automatic node discovery
-- **API**: REST endpoints for programmatic access
