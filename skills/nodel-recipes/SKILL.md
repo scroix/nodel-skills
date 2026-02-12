@@ -25,9 +25,9 @@ See `references/jython-syntax.md` for complete syntax reference.
 
 A node recipe lives in a folder containing:
 - `script.py` - Main recipe logic (required)
-- `index.xml` - Custom frontend (optional)
-- `custom.css` - Custom styles (optional)
-- `custom.js` - Custom JavaScript (optional)
+- `content/index.xml` - Custom frontend definition (optional)
+- `content/css/custom.css` - Custom styles (optional)
+- `content/js/custom.js` - Custom JavaScript (optional)
 
 ## Core Concepts
 
