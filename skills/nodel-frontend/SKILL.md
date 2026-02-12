@@ -48,10 +48,11 @@ nodes/My Node/
 | Attribute | Purpose |
 |-----------|---------|
 | `title` | Dashboard title in header |
-| `theme` | `light` or `dark` (default: dark) |
+| `theme` | Passed through to Bootstrap navbar classes and theme CSS selection |
 | `logo` | Custom logo image path |
 | `css` | Custom CSS file path |
 | `js` | Custom JavaScript file path |
+| `core` | Core/admin mode (skips custom `css` / `js` loading) |
 
 ## Layout System
 
@@ -110,6 +111,11 @@ Dropdown navigation for many pages:
 ## UI Components
 
 See `references/components.md` for complete component reference.
+
+Notes:
+- Use `<image source='...'>` for images (`<img>` is not a supported component tag).
+- `<input>` is header-only (place directly under `<header>`; checkbox is the built-in rendered type).
+- `<footer>` should contain `<row>` children.
 
 ### Buttons
 
@@ -191,6 +197,10 @@ See `references/components.md` for complete component reference.
 <!-- With nudge buttons -->
 <range event='Volume' action='Volume' min='0' max='100' nudge='5'/>
 ```
+
+Behavior details:
+- `type='mute'` creates a mute toggle bound to `{baseName}Muting` (for `Volume`, bind `VolumeMuting`).
+- `nudge` buttons only appear if `action` or `join` is present.
 
 ### Status Display
 
@@ -299,7 +309,7 @@ Status indicators:
   <header>
     <nodel type='nav'/>    <!-- Node navigation dropdown -->
     <nodel type='edit'/>   <!-- Edit functions dropdown -->
-    <input type='text' placeholder='Search'/>
+    <input type='checkbox' event='AdminMode' action='AdminMode'>Admin</input>
     <button action='Refresh'>Refresh</button>
   </header>
   ...
@@ -363,7 +373,7 @@ Supporting script.py code:
 local_event_AdminEnabled = LocalEvent({'schema': {'type': 'boolean'}})
 local_event_AdminDisabled = LocalEvent({'schema': {'type': 'boolean'}})
 
-@local_action
+@local_action({})
 def AdminEnabled(arg):
     local_event_AdminEnabled.emit(arg)
     local_event_AdminDisabled.emit(not arg)

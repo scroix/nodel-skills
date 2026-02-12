@@ -105,7 +105,7 @@ def initAdmin():
 
 admin_timer = Timer(lambda: AdminEnabled(False), ADMIN_TIMEOUT * 60, stopped=True)
 
-@local_action
+@local_action({})
 def AdminEnabled(arg):
     local_event_AdminEnabled.emit(arg)
     local_event_AdminDisabled.emit(not arg)

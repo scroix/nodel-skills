@@ -15,11 +15,11 @@ Complete reference for all Nodel frontend UI components.
 | Attribute | Description |
 |-----------|-------------|
 | `title` | Dashboard title displayed in header |
-| `theme` | `light` or `dark` (default: inverse/dark) |
+| `theme` | Passed through to Bootstrap navbar style (`navbar-{theme}`) and CSS file selection (`components.{theme}.css`) |
 | `logo` | Path to custom logo image |
 | `css` | Path to custom CSS file |
 | `js` | Path to custom JavaScript file |
-| `core` | Set to enable core/admin mode |
+| `core` | Core/admin mode. Skips custom `css`/`js` loading and adds `core` class on `<body>` |
 
 ### page
 
@@ -55,6 +55,12 @@ Creates dropdown menu for child pages.
 
 Horizontal row container for columns.
 
+| Attribute | Description |
+|-----------|-------------|
+| `showevent` | Event name for row visibility |
+| `showvalue` | Value(s) that make the row visible |
+| `showeventarg` | Match against another event argument |
+
 ### column
 
 ```xml
@@ -73,6 +79,8 @@ Horizontal row container for columns.
 | `value` | Value to match for visibility |
 | `showevent` | Alternative visibility event |
 | `showvalue` | Alternative visibility value |
+| `push` | Bootstrap `col-sm-push-*` class |
+| `pull` | Bootstrap `col-sm-pull-*` class |
 
 ### group
 
@@ -85,26 +93,45 @@ Horizontal row container for columns.
 
 Visual grouping container with background.
 
+### grid
+
+```xml
+<grid>
+  <row>
+    <cell><button action='1'>1</button></cell>
+    <cell><button action='2'>2</button></cell>
+    <cell><button action='3'>3</button></cell>
+  </row>
+</grid>
+```
+
+Table-style layout for keypad/matrix controls.
+
 ### header
 
 ```xml
 <header>
   <nodel type='nav'/>
+  <input type='checkbox' event='AdminMode' action='AdminMode'>Admin</input>
   <button action='Refresh'>Refresh</button>
 </header>
 ```
 
-Custom header content.
+Header is special-cased. Supported direct children are `nodel`, `input`, `button`, `switch`.
 
 ### footer
 
 ```xml
 <footer>
-  <text>Footer content</text>
+  <row>
+    <column sm='12'>
+      <text>Footer content</text>
+    </column>
+  </row>
 </footer>
 ```
 
-Fixed footer at bottom.
+Fixed footer at bottom. Footer renders `row` children.
 
 ## Button Components
 
@@ -235,9 +262,11 @@ Dropdown selection.
 | `min` | Minimum value |
 | `max` | Maximum value |
 | `step` | Step increment |
-| `nudge` | Nudge button increment |
-| `type` | `mute` (add mute button), `vertical` |
+| `nudge` | Nudge increment. Buttons render only when `action` or `join` is set |
+| `type` | `mute` (adds mute button), `vertical` |
 | `height` | Height for vertical slider |
+
+`type='mute'` appends `Muting` to the base event/action name. Example: `Volume` -> `VolumeMuting`.
 
 ## Status Components
 
@@ -283,6 +312,26 @@ Shows abbreviated event value.
 |-----------|-------------|
 | `event` | Event for meter value |
 | `range` | Value range type (`db` for decibels) |
+
+### signal
+
+```xml
+<signal event='SignalLevel'>Signal</signal>
+<signal event='SignalLevel' range='db'>Signal dB</signal>
+```
+
+Signal badge with meter color classes.
+
+### statussleep
+
+```xml
+<status event='DisplayStatus'>
+  <statussleep action='SleepDisplay'/>
+  Display Status
+</status>
+```
+
+Sleep action button rendered in the status footer.
 
 ## Text Components
 
@@ -336,24 +385,30 @@ Scrollable text area.
 ### input
 
 ```xml
-<input type='text' event='SearchTerm' action='Search' placeholder='Search...'/>
+<header>
+  <input type='checkbox' event='AdminMode' action='AdminMode'>Admin</input>
+</header>
 ```
+
+`input` is header-only in Nodel dashboards. Use it directly under `<header>`.
 
 | Attribute | Description |
 |-----------|-------------|
-| `type` | `text`, `number`, `checkbox` |
+| `type` | `checkbox` is explicitly handled by default templates |
 | `event` | Event for current value |
-| `action` | Action on submit |
-| `placeholder` | Placeholder text |
+| `action` | Action to invoke |
 
 ## Media Components
 
-### img
+### image
 
 ```xml
-<img src='screenshot.png'/>
-<img event='ImageURL'/>
+<image source='screenshot.png'/>
+<image event='ImageURL'/>
+<image source='photo.jpg' width='320' height='180'/>
 ```
+
+`source` is static image URL/path. `event` can supply a dynamic image URL.
 
 ### qrcode
 
@@ -382,8 +437,16 @@ Scrollable text area.
 ### link
 
 ```xml
-<link url='http://example.com'>Link Text</link>
-<link url='http://example.com' target='_blank'>Open in New Tab</link>
+<!-- Link to another node UI -->
+<link node='Display Node'>Open Display Node</link>
+
+<!-- External URL -->
+<link url='http://example.com'>Open URL</link>
+
+<!-- Inside <status event='...'> use parent status value as URL -->
+<status event='HelpURL'>
+  <link>Open Help</link>
+</status>
 ```
 
 ### icon
@@ -408,6 +471,22 @@ Scrollable text area.
 
 Color selection for lighting control.
 
+`options` supports channel modifiers:
+- `k` = colour temperature
+- `w` = white
+- `a` = amber
+- `u` = UV
+- `i` = infrared
+
+### gap
+
+```xml
+<gap/>           <!-- default 20px -->
+<gap value='32'/> <!-- 32px -->
+```
+
+Vertical spacing helper.
+
 ## Common Attributes
 
 These attributes work on most components:
@@ -416,5 +495,6 @@ These attributes work on most components:
 |-----------|-------------|
 | `showevent` | Event name for visibility control |
 | `showvalue` | Value(s) that make element visible |
+| `showeventarg` | Alternate event argument key for visibility checks |
 | `class` | CSS class names |
 | `style` | Inline CSS styles |
