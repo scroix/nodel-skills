@@ -46,22 +46,14 @@ Copy the `skills/` directory to your Codex skills directory: `$CODEX_HOME/skills
 
 ## Repository Structure
 
-Each skill directory follows the Agent Skills format with a required `SKILL.md` plus optional resource folders.
+Each directory under `skills/` follows the Agent Skills format.
 
 ```text
-nodel-skills/
-├── skills/
-│   ├── nodel-recipes/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   ├── nodel-use/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   └── nodel-frontend/
-│       ├── SKILL.md
-│       └── references/
-└── .claude-plugin/
-    └── marketplace.json
+skills/[skill-name]/
+├── SKILL.md      - Required instructions and trigger metadata
+├── scripts/      - Optional executable utilities
+├── references/   - Optional domain/reference docs
+└── assets/       - Optional templates and bundled files
 ```
 
 ## About Nodel
