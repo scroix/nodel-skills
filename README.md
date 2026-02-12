@@ -1,6 +1,4 @@
-Agent skills for developing, operating, and troubleshooting Nodel nodes.
-
-Built on the [Agent Skills specification](https://agentskills.io/specification) for compatibility with Claude Code and Codex CLI.
+A collection of [Agent Skills](https://agentskills.io/specification) for working with Nodel.
 
 ## Installation
 
