@@ -8,8 +8,8 @@ Default: `http://localhost:8085`
 
 The port can be configured with `-p` flag when starting Nodel.
 
-For `POST` endpoints, send JSON in the request body. If there is no explicit payload,
-send an empty object (`-d '{}'`) to avoid request parsing errors.
+For most service `POST` endpoints, send JSON in the request body. If there is no explicit payload,
+send an empty object (`-d '{}'`) to avoid request parsing errors. File upload endpoints accept raw file content instead.
 
 ## Host-Level Endpoints
 
@@ -40,9 +40,6 @@ curl "http://localhost:8085/REST/nodeURLsForNode?name=Display%20Node"
 # Get framework logs
 curl "http://localhost:8085/REST/logs?from=0&max=50"
 
-# Long-poll for new logs
-curl "http://localhost:8085/REST/logs?from=12345&max=50&timeout=5000"
-
 # Warning logs only
 curl "http://localhost:8085/REST/warningLogs?from=0&max=50"
 ```
@@ -56,8 +53,9 @@ curl http://localhost:8085/REST/diagnostics
 # Python toolkit reference
 curl http://localhost:8085/REST/toolkit
 
-# Host startup timestamp
-curl http://localhost:8085/REST/started
+# Host metadata, including startup timestamp
+curl http://localhost:8085/REST
+# Returns: {"started": "...", "nodes": {...}}
 ```
 
 ### Recipe Management
@@ -172,12 +170,12 @@ curl http://localhost:8085/REST/nodes/My%20Node/remote/schema
 
 # Get current bindings
 curl http://localhost:8085/REST/nodes/My%20Node/remote
-# Returns: {"DisplayPower": {"node": "Display Node", "action": "Power"}}
+# Returns: {"actions": {...}, "events": {...}}
 
 # Save remote bindings
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remote/save" \
   -H "Content-Type: application/json" \
-  -d '{"DisplayStatus": {"node": "Display Node", "event": "Status"}}'
+  -d '{"actions":{"DisplayPower":{"node":"Display Node","action":"Power"}},"events":{"DisplayStatus":{"node":"Display Node","event":"Status"}}}'
 ```
 
 ### Script Management
@@ -189,8 +187,13 @@ curl http://localhost:8085/REST/nodes/My%20Node/script/raw
 
 # Save script
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/script/save" \
-  -H "Content-Type: text/plain" \
-  --data-binary @script.py
+  -H "Content-Type: application/json" \
+  -d '{"script":"console.info(\"updated\")\n"}'
+
+# Restart after saving when you need the new script bindings to run
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Evaluate Python expression
 curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=param_ipAddress"
@@ -211,12 +214,13 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart" \
   -d '{}'
 
 # Check if restarted (for waiting after restart)
-curl "http://localhost:8085/REST/nodes/My%20Node/hasRestarted?timestamp=1705312200000&timeout=5000"
+curl "http://localhost:8085/REST/nodes/My%20Node/hasRestarted?timestamp=2026-06-27T19%3A21%3A42.391%2B10%3A00&timeout=5000"
+# Returns: {"timestamp":"2026-06-27T19:21:42.391+10:00"}
 
 # Rename node
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename?newName=New%20Name" \
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"value":"New Name"}'
 
 # Delete node (requires confirmation)
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
@@ -286,7 +290,7 @@ Add `?trace` to any endpoint for full stack traces in error responses.
 |-----------|-----------|---------|
 | `from` | console, logs, activity | Start sequence number |
 | `max` | console, logs | Maximum entries to return |
-| `timeout` | console, logs | Long-poll timeout in ms |
+| `timeout` | node console, node logs, hasRestarted | Long-poll timeout in ms |
 | `filter` | `nodeURLs` | Optional string filter |
 | `name` | `nodeURLsForNode` | Node name lookup |
 | `trace` | Any | Include stack traces in errors |

@@ -59,7 +59,6 @@ Horizontal row container for columns.
 |-----------|-------------|
 | `showevent` | Event name for row visibility |
 | `showvalue` | Value(s) that make the row visible |
-| `showeventarg` | Match against another event argument |
 
 ### column
 
@@ -487,14 +486,14 @@ Color selection for lighting control.
 
 Vertical spacing helper.
 
-## Common Attributes
+## Shared Attributes
 
-These attributes work on most components:
+These attributes are shared by many stock templates, but support is per-component:
 
 | Attribute | Description |
 |-----------|-------------|
-| `showevent` | Event name for visibility control |
-| `showvalue` | Value(s) that make element visible |
-| `showeventarg` | Alternate event argument key for visibility checks |
-| `class` | CSS class names |
-| `style` | Inline CSS styles |
+| `showevent` | Event name for visibility control where the component renders it |
+| `showvalue` | Value(s) that make the element visible where the component renders it |
+| `class` | CSS class names only on components that explicitly pass classes through |
+
+Current release templates do not render `showeventarg`, and inline `style` is not generally passed through. Use custom CSS files/classes for styling.

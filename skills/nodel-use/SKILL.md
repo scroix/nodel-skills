@@ -36,7 +36,7 @@ See `references/rest-api.md` for complete endpoint reference.
 | `/REST/discovery` | GET | Discovery service state |
 | `/REST/nodeURLs` | GET | Advertised node URLs (`?filter=` optional) |
 | `/REST/nodeURLsForNode` | GET | Advertised URLs for one node (`?name=`) |
-| `/REST/started` | GET | Host startup timestamp |
+| `/REST` | GET | Host metadata, including startup timestamp |
 | `/REST/logs` | GET | Framework logs |
 | `/REST/diagnostics` | GET | System diagnostics |
 | `/REST/recipes/list` | GET | Available node recipes |
@@ -180,9 +180,9 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart" \
   -d '{}'
 
 # Rename
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename?newName=New%20Name" \
+curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"value":"New Name"}'
 
 # Delete (requires confirmation)
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
@@ -196,4 +196,4 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
 2. **Use `?trace` for debugging** - Adds stack traces to error responses
 3. **POST payloads** - Send JSON for POST endpoints (`-d '{}'` if no explicit payload)
 4. **Long-poll timeout** - Use 5000-10000ms for log tailing
-5. **Check restart completion** - Use `/hasRestarted?timestamp={before}&timeout=5000`
+5. **Check restart completion** - Use `/hasRestarted?timestamp={url-encoded ISO timestamp}&timeout=5000`
