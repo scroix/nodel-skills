@@ -496,4 +496,4 @@ These attributes are shared by many stock templates, but support is per-componen
 | `showvalue` | Value(s) that make the element visible where the component renders it |
 | `class` | CSS class names only on components that explicitly pass classes through |
 
-Current release templates do not render `showeventarg`, and inline `style` is not generally passed through. Use custom CSS files/classes for styling.
+Stable release templates do not render `showeventarg`; Nodel Tip/nightly templates do. Verify the target host templates before relying on it. Inline `style` is not generally passed through. Use custom CSS files/classes for styling.
