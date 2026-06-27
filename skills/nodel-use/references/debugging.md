@@ -291,8 +291,8 @@ curl -X POST ".../restart" \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Wait for restart to complete
-curl ".../hasRestarted?timestamp=$(date +%s)000&timeout=10000"
+# Wait for restart to complete using the node's previous ISO started timestamp
+curl ".../hasRestarted?timestamp=2026-06-27T19%3A21%3A42.391%2B10%3A00&timeout=10000"
 
 # Verify node is back
 curl ".../console?from=0&max=5"
