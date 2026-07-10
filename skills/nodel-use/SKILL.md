@@ -7,7 +7,7 @@ description: Interact with running Nodel instances via REST API - check node sta
 
 ## Quick Reference
 
-**Default Base URL:** `http://localhost:8085`
+**Common Base URL:** `http://localhost:8085` (the host tries its cached last port first, or 8085 when no port is configured or cached)
 
 ```bash
 # List all nodes
@@ -193,7 +193,7 @@ curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
 ## Tips
 
 1. **URL-encode node names** - Spaces become `%20`
-2. **Use `?trace` for debugging** - Adds stack traces to error responses
-3. **POST payloads** - Send JSON for POST endpoints (`-d '{}'` if no explicit payload)
+2. **Use `?trace` for debugging** - Adds a stack trace to serialization, Python, and unexpected 500 responses; routing/not-found errors deliberately omit it
+3. **POST payloads** - Service endpoints use JSON (`-d '{}'` if no explicit payload); `/files/save` is the raw-file-content exception
 4. **Long-poll timeout** - Use 5000-10000ms for log tailing
 5. **Check restart completion** - Use `/hasRestarted?timestamp={url-encoded ISO timestamp}&timeout=5000`

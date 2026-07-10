@@ -4,7 +4,7 @@ Complete reference for all Nodel REST API endpoints.
 
 ## Base URL
 
-Default: `http://localhost:8085`
+Common: `http://localhost:8085`. With no configured port, the host first reuses its cached last port and otherwise tries 8085; an explicitly configured port takes precedence.
 
 The port can be configured with `-p` flag when starting Nodel.
 
@@ -260,27 +260,29 @@ ws://localhost:8085/nodes/{nodeName}
 Message types:
 - `activityHistory` - Initial array of all activity (sent on connect)
 - `activity` - Single activity entry (sent on changes)
-- `ping` - Heartbeat every 45 seconds
+
+The server also sends a WebSocket protocol ping frame every 45 seconds. `ping` is not a JSON message type.
 
 ## Error Responses
 
 ```json
 {
-  "code": "404",
   "error": "EndpointNotFoundException",
   "message": "Node not found",
-  "cause": {...}
+  "cause": null,
+  "stackTrace": null
 }
 ```
 
-Add `?trace` to any endpoint for full stack traces in error responses.
+Fields with null values may be omitted by serialization. REST errors use the HTTP status for 404/500; the `code` field is populated by the separate non-REST node-path not-found response, not the normal REST exception path.
+
+Add `?trace` when diagnosing serialization, Python, or unexpected server errors. Those 500 paths may include one stack trace; routing, file-not-found, and unknown-service errors deliberately do not.
 
 ## Common HTTP Status Codes
 
 | Code | Meaning |
 |------|---------|
 | 200 | Success |
-| 400 | Bad request (invalid parameters) |
 | 404 | Node or endpoint not found |
 | 500 | Server error (check console) |
 
@@ -293,4 +295,4 @@ Add `?trace` to any endpoint for full stack traces in error responses.
 | `timeout` | node console, node logs, hasRestarted | Long-poll timeout in ms |
 | `filter` | `nodeURLs` | Optional string filter |
 | `name` | `nodeURLsForNode` | Node name lookup |
-| `trace` | Any | Include stack traces in errors |
+| `trace` | Serialization, Python, and unexpected 500 paths | Include one stack trace in those error responses |

@@ -397,7 +397,7 @@ response = get_url('http://api.example.com/status',
 
 # Include response metadata + headers
 full = get_url('http://api.example.com/status', fullResponse=True)
-console.info('HTTP status: %s %s' % (full.statusCode, full.reason))
+console.info('HTTP status: %s %s' % (full.statusCode, full.reasonPhrase))
 body = full.content
 
 # With headers
@@ -420,7 +420,7 @@ _toolkit.getHttpClient().setIgnoreSSL(True)
 
 ```python
 # Process with auto-restart
-process = Process('tail -f /var/log/syslog',
+process = Process(['tail', '-f', '/var/log/syslog'],
     stdout=on_stdout,
     stderr=on_stderr,
     started=on_started,
@@ -439,7 +439,7 @@ process.close()
 
 ```python
 # One-shot command
-quick_process('ls -la',
+quick_process(['ls', '-la'],
     finished=on_complete,
     working='/tmp')
 
@@ -478,7 +478,7 @@ formatted = now.toString('yyyy-MM-dd HH:mm:ss')
 # Parse datetime
 parsed = date_parse('2024-01-15T10:30:00')
 
-# System clock (milliseconds since epoch)
+# Monotonic high-resolution clock in milliseconds (not epoch time; it can wrap)
 millis = system_clock()
 
 # Create datetime from epoch milliseconds

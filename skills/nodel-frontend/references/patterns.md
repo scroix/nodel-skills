@@ -97,16 +97,7 @@ local_event_ConfirmCode = LocalEvent({'schema': {'type': 'string'}})
 
 ADMIN_TIMEOUT = 5  # minutes
 
-@after_main
-def initAdmin():
-    local_event_AdminEnabled.emit(False)
-    local_event_AdminDisabled.emit(True)
-    admin_timer.stop()
-
-admin_timer = Timer(lambda: AdminEnabled(False), ADMIN_TIMEOUT * 60, stopped=True)
-
-@local_action({})
-def AdminEnabled(arg):
+def set_admin_enabled(arg):
     local_event_AdminEnabled.emit(arg)
     local_event_AdminDisabled.emit(not arg)
     if arg:
@@ -114,6 +105,16 @@ def AdminEnabled(arg):
         admin_timer.start()
     else:
         admin_timer.stop()
+
+admin_timer = Timer(lambda: set_admin_enabled(False), ADMIN_TIMEOUT * 60, stopped=True)
+
+@after_main
+def initAdmin():
+    set_admin_enabled(False)
+
+@local_action({})
+def AdminEnabled(arg):
+    set_admin_enabled(arg)
 ```
 
 ## Multi-Room Dashboard

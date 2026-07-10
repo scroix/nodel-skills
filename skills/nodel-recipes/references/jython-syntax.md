@@ -1,6 +1,6 @@
 # Jython 2.5 Syntax Reference
 
-Nodel recipes run on Jython 2.5.4 (Python 2.5 syntax on JVM). This reference covers syntax differences from modern Python.
+Nodel recipes run on the bundled Jython 2.5.4-rc1 runtime (Python 2.5 syntax on the JVM). This reference covers syntax differences from modern Python.
 
 ## Critical Syntax Differences
 
@@ -190,14 +190,13 @@ import struct
 
 These are available in Jython and commonly used in Nodel recipes.
 
-### Avoid / Unavailable
+### Version-Limited or Unmanaged APIs
 
 - `collections.OrderedDict` - Not in 2.5
 - `collections.Counter` - Not in 2.5
 - `argparse` - Not in 2.5
-- `logging` module - Use console instead
-- `subprocess` - Use Process/quick_process instead
-- `urllib2` - Use get_url instead
+- `logging` exists in the Python standard library, but Nodel's `console` integrates with the node console levels
+- `subprocess` and `urllib2` are not Nodel-managed; prefer `Process`/`quick_process` and `get_url` so lifecycle and instrumentation stay with the node toolkit
 
 ## Common Patterns
 

@@ -32,7 +32,7 @@ Complete reference for all Nodel frontend UI components.
 | Attribute | Description |
 |-----------|-------------|
 | `title` | Page tab title |
-| `action` | Action to call when page loads |
+| `action` | Action to call when the page is selected, including the initial programmatic selection |
 
 ### pagegroup
 
@@ -298,7 +298,7 @@ Small colored indicator based on event value.
 <partialbadge event='PartialStatus'/>
 ```
 
-Shows abbreviated event value.
+Maps `On`, `Off`, `PartiallyOn`, and `PartiallyOff` event strings to a compact label. The optional `on` and `off` attributes replace the displayed labels.
 
 ### meter
 
@@ -403,11 +403,15 @@ Scrollable text area.
 
 ```xml
 <image source='screenshot.png'/>
-<image event='ImageURL'/>
+<image source='placeholder.png' event='ImageURL'/>
 <image source='photo.jpg' width='320' height='180'/>
 ```
 
 `source` is static image URL/path. `event` can supply a dynamic image URL.
+
+Always provide `source`, including for event-backed images. The XSL renderer emits an `src` attribute immediately; without `source` it becomes `src=""`, so the browser may show a broken image or request the current page until the first string event replaces `src`. Use a real placeholder or a transparent data URI when the initial image should be blank.
+
+`image` is an inline-style exception: `width` and `height` are rendered as `max-width` and `max-height` pixel declarations on the generated `<img>`. A raw XML `style` attribute is not copied through.
 
 ### qrcode
 
@@ -442,11 +446,13 @@ Scrollable text area.
 <!-- External URL -->
 <link url='http://example.com'>Open URL</link>
 
-<!-- Inside <status event='...'> use parent status value as URL -->
-<status event='HelpURL'>
-  <link>Open Help</link>
+<!-- Follow the node bound to the parent remote event -->
+<status event='DisplayStatus'>
+  <link>Open bound display node</link>
 </status>
 ```
+
+A `link` with neither `node` nor `url` uses its parent component's `event` alias, looks that alias up in `/REST/remote`, and opens the node bound to that remote event. It does not treat the event value as a URL.
 
 ### icon
 
@@ -496,4 +502,4 @@ These attributes are shared by many stock templates, but support is per-componen
 | `showvalue` | Value(s) that make the element visible where the component renders it |
 | `class` | CSS class names only on components that explicitly pass classes through |
 
-Stable release templates do not render `showeventarg`; Nodel Tip/nightly templates do. Verify the target host templates before relying on it. Inline `style` is not generally passed through. Use custom CSS files/classes for styling.
+`showeventarg` support is per-component: the checked source renders it only in templates that explicitly test that attribute. Inline `style` is not generally copied through; the `image` `width`/`height`, `gap` `value`, vertical `range` `height`, and `panel` `height` templates generate their own inline styles. Use the documented sizing attributes or custom CSS for other styling.
