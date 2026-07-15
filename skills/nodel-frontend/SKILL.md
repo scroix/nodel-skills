@@ -344,16 +344,30 @@ img:hover {
 ### custom.js
 
 ```javascript
-// Add custom behavior
 $(document).ready(function() {
-  // Custom initialization
-});
+  // Nodel renders <text event="DeviceStatus"> as an element with
+  // data-event="DeviceStatus", then updates its text when the event arrives.
+  var target = document.querySelector('[data-event="DeviceStatus"]');
+  if (!target) return;
 
-// Handle custom events
-$(document).on('nodel-event', function(e, data) {
-  console.log('Event:', data);
+  var lastValue;
+  function handleRenderedValue() {
+    var value = target.textContent;
+    if (value === lastValue) return;
+    lastValue = value;
+    console.log('DeviceStatus:', value);
+  }
+
+  new MutationObserver(handleRenderedValue).observe(target, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
+  handleRenderedValue();
 });
 ```
+
+There is no `nodel-event` DOM event. The renderer adds `nodel-event` as a CSS class to elements with `data-event`, and `process_event` updates the rendered element directly. Observe the specific DOM property that the stock renderer changes (text in the example above, or `src` for an event-backed image).
 
 ## Common Patterns
 

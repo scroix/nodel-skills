@@ -12,8 +12,9 @@ curl http://localhost:8085/REST/nodes | python -m json.tool
 
 If node is missing:
 - Check the nodes/ directory for the node folder
-- Look for script.py syntax errors (node won't load)
-- Check framework logs for startup errors
+- Check framework logs for folder discovery or host startup errors
+
+A managed node normally remains listed even when its script has load errors; in that case inspect the node's `/console` output instead.
 
 ### 1b. Check Discovery and Advertised URLs
 
@@ -80,11 +81,11 @@ curl ".../eval?expr=local_event_Status.getArg()"
 
 ## Common Issues
 
-### Node Won't Start
+### Script Won't Start Cleanly
 
 **Symptoms:**
-- Node missing from `/REST/nodes`
-- No console output
+- Node is listed but has script errors in `/console`
+- Expected actions, events, or parameters are missing
 
 **Causes:**
 1. **Syntax error in script.py**
@@ -94,8 +95,8 @@ curl ".../eval?expr=local_event_Status.getArg()"
    ```
    Look for Python exceptions mentioning your node name.
 
-2. **Missing main() function**
-   Every node needs `def main():` even if empty.
+2. **Top-level load failure**
+   `main()` is optional. Nodel explicitly continues when it is absent, so inspect the framework error for the actual script load or binding failure.
 
 3. **Import error**
    Using modules not available in Jython 2.5.
@@ -113,8 +114,9 @@ curl ".../eval?expr=local_event_Status.getArg()"
 # Check connection state (requires _isConnected variable set by TCP callbacks)
 curl ".../eval?expr=_isConnected"
 
-# Check destination
-curl ".../eval?expr=tcp._dest"
+# Check configured destination inputs (ManagedTCP has no public destination getter)
+curl ".../eval?expr=param_ipAddress"
+curl ".../eval?expr=param_port"
 
 # Check last receive time
 curl ".../eval?expr=_lastReceive"
@@ -147,7 +149,7 @@ curl ".../logs?from=0&max=20"
 # Add debug logging
 curl -X POST ".../exec" \
   -H "Content-Type: application/json" \
-  -d '{"code":"console.info(\"Connection state: %s, dest: %s\" % (_isConnected, tcp._dest))"}'
+  -d '{"code":"console.info(\"Connection state: %s, dest: %s:%s\" % (_isConnected, param_ipAddress, param_port))"}'
 ```
 
 **Common causes:**
@@ -210,8 +212,9 @@ The `/eval` endpoint is powerful for inspection:
 # Check any variable
 curl ".../eval?expr=param_ipAddress"
 
-# Check object properties
-curl ".../eval?expr=tcp._dest"
+# Check configured destination inputs
+curl ".../eval?expr=param_ipAddress"
+curl ".../eval?expr=param_port"
 curl ".../eval?expr=_isConnected"
 
 # Check event state
@@ -253,21 +256,12 @@ curl -X POST ".../exec" \
 
 ## Live Log Tailing
 
-For continuous monitoring:
+For continuous monitoring, pass the highest returned `seq` plus one as the next `from` value. Sequence numbers are counters, not row offsets; do not increment them by the requested `max` page size.
 
 ```bash
-#!/bin/bash
-SEQ=0
-while true; do
-  RESPONSE=$(curl -s ".../console?from=$SEQ&max=50&timeout=5000")
-  echo "$RESPONSE" | python -c "
-import sys, json
-for entry in json.load(sys.stdin):
-    print('[%s] %s: %s' % (entry['console'], entry['timestamp'], entry['comment']))
-"
-  # Update SEQ from response (would need parsing)
-  SEQ=$((SEQ + 50))
-done
+curl ".../console?from=0&max=50"
+# Read max(entry.seq) from the JSON response, then long-poll with:
+curl ".../console?from=<highest-seq-plus-one>&max=50&timeout=5000"
 ```
 
 ## Framework Diagnostics

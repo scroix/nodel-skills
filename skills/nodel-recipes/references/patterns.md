@@ -301,7 +301,7 @@ def Start(arg=None):
         console.warn('Already running')
         return
 
-    _process = Process(param_command,
+    _process = Process([param_command],
                        working=param_workingDir,
                        stdout=on_stdout,
                        stopped=on_stopped)

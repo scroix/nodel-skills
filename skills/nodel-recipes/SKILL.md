@@ -7,7 +7,7 @@ description: Write Nodel node recipes (script.py) using Jython 2.5 - define acti
 
 ## Critical: Jython 2.5 Syntax
 
-Node scripts execute under Jython 2.5.4. You MUST use Python 2.5-era syntax:
+Node scripts execute under the bundled Jython 2.5.4-rc1 runtime. You MUST use Python 2.5-era syntax:
 
 ```python
 # CORRECT - Python 2.5 syntax
@@ -130,14 +130,16 @@ console.error("Red - error")
 ### Device Control with Polling
 
 ```python
+def tcp_received(data):
+    if 'POWER=' in data:
+        local_event_Status.emit({'power': data.split('=')[1]})
+
+tcp = TCP(received=tcp_received)
+
 def poll_status():
     tcp.send('STATUS?\r\n')
 
 Timer(poll_status, 30)
-
-def tcp_received(data):
-    if 'POWER=' in data:
-        local_event_Status.emit({'power': data.split('=')[1]})
 ```
 
 ### Status Monitoring
