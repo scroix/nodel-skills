@@ -1,6 +1,6 @@
 ---
 name: nodel-dev
-description: Develop the Nodel platform source itself - build the Java framework, Jython host, and web UI with Gradle, run a dev host, and run the Playwright integration/E2E tests. Use when modifying Nodel platform code, not for writing recipes (nodel-recipes) or building node dashboards (nodel-frontend).
+description: Develop the Nodel platform source itself - build the Java framework, Jython host, and web UI with Gradle, run a dev host, and run the Playwright integration/E2E tests. Use when modifying Nodel platform code, not for authoring script.py recipes, building node dashboards, or inspecting and managing running hosts through REST.
 ---
 
 # Nodel Platform Development

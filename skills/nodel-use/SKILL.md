@@ -1,6 +1,6 @@
 ---
 name: nodel-use
-description: Interact with running Nodel instances via REST API - check node status, view console logs, invoke actions, debug nodes, manage deployments. Use when making curl commands, API calls, or troubleshooting Nodel.
+description: Inspect, debug, and manage running Nodel hosts and nodes through the REST API. Use for live status, console logs, actions, events, parameters, bindings, scripts, files, restarts, renames, and removals. Do not use for authoring recipe logic, building dashboards, or changing Nodel platform source.
 ---
 
 # Interacting with Running Nodel Instances

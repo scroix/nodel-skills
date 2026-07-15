@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "selection_mode": "implicit",
+  "cases": [
+    {
+      "id": "recipe-creation",
+      "category": "positive",
+      "prompt": "Create a Nodel script.py recipe for a TCP-controlled projector using the bundled Jython runtime.",
+      "expected_nodel_skills": [
+        "nodel-recipes"
+      ]
+    },
+    {
+      "id": "live-node-connection-failure",
+      "category": "positive",
+      "prompt": "A running Nodel display node is disconnected. Inspect its host through REST, read the node console, and diagnose the connection failure.",
+      "expected_nodel_skills": [
+        "nodel-use"
+      ]
+    },
+    {
+      "id": "index-dashboard",
+      "category": "positive",
+      "prompt": "Build a content/index.xml dashboard for a Nodel node with power, source, and volume controls, plus responsive CSS and JavaScript behavior.",
+      "expected_nodel_skills": [
+        "nodel-frontend"
+      ]
+    },
+    {
+      "id": "platform-source-change",
+      "category": "positive",
+      "prompt": "Fix a failing Gradle test in nodel-jyhost and update the Nodel Java host source.",
+      "expected_nodel_skills": [
+        "nodel-dev"
+      ]
+    },
+    {
+      "id": "generic-react-dashboard",
+      "category": "negative",
+      "prompt": "Build a React dashboard for sales analytics with charts, filters, and a responsive layout.",
+      "expected_nodel_skills": []
+    },
+    {
+      "id": "recipe-with-dashboard",
+      "category": "ambiguous",
+      "prompt": "Create a Nodel script.py recipe for a TCP-controlled display and add its content/index.xml dashboard for power, source, and volume.",
+      "expected_nodel_skills": [
+        "nodel-recipes",
+        "nodel-frontend"
+      ]
+    }
+  ]
+}
