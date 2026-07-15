@@ -1,0 +1,40 @@
+{
+  "name": "nodel",
+  "version": "1.1.6",
+  "description": "Agent skills for building, debugging, and operating Nodel systems.",
+  "author": {
+    "name": "scroix",
+    "url": "https://github.com/scroix"
+  },
+  "homepage": "https://github.com/scroix/nodel-skills#readme",
+  "repository": "https://github.com/scroix/nodel-skills",
+  "license": "MIT",
+  "keywords": [
+    "nodel",
+    "device-control",
+    "jython",
+    "rest-api",
+    "dashboards"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Nodel",
+    "shortDescription": "Build, debug, and operate Nodel systems",
+    "longDescription": "Create Nodel recipes and frontends, then inspect and manage running Nodel hosts through their REST API.",
+    "developerName": "scroix",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/scroix/nodel-skills",
+    "defaultPrompt": [
+      "Create a Nodel recipe for a TCP-controlled display.",
+      "Troubleshoot a running Nodel node through its REST API.",
+      "Build a Nodel dashboard for power, source, and volume."
+    ],
+    "brandColor": "#C2D867",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.svg"
+  }
+}

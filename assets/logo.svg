@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Nodel plugin logo</title>
+  <rect width="512" height="512" rx="112" fill="#24303C"/>
+  <path d="m154 166 102-59 102 59v118l-102 59-102-59z" fill="none" stroke="#8492A5" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M256 225v118M154 166l102 59 102-59" fill="none" stroke="#8492A5" stroke-width="24" stroke-linejoin="round"/>
+  <circle cx="256" cy="107" r="38" fill="#C2D867"/>
+  <circle cx="154" cy="284" r="38" fill="#C2D867"/>
+  <circle cx="358" cy="284" r="38" fill="#C2D867"/>
+  <circle cx="256" cy="405" r="38" fill="#C2D867"/>
+  <path d="M256 343v62" stroke="#8492A5" stroke-width="24"/>
+</svg>
