@@ -7,7 +7,7 @@ Paths are relative to the Nodel repository root. Package `org.nodel.*` lives in
 ## Nodel points: servers and clients
 
 A "nodel point" is a named action or event on a node (`org.nodel.core.NodelPoint`).
-Two singletons manage them (`nodel-framework/src/main/java/org/nodel/core/`):
+Two singletons manage them (package `org.nodel.core`):
 
 - **`NodelServers`** — the server side. A node registers its local actions and
   events here (`NodelServerAction`, `NodelServerEvent`); this is what makes
@@ -23,23 +23,23 @@ through `LoopbackChannelClient` / `LoopbackChannelServer` instead of
 
 ## Wire protocol: line-delimited JSON
 
-`ChannelMessage` (`org/nodel/core/ChannelMessage.java`) is a flat class of
-`@Value`-annotated public fields — `node`, `actions`, `events`, `action`,
-`arg`, `event`, etc. One instance is one protocol message:
+`ChannelMessage` (`org.nodel.core`) is a flat class of `@Value`-annotated
+public fields — `node`, `actions`, `events`, `action`, `arg`, `event`, etc.
+One instance is one protocol message:
 
 - Serialized to JSON via `org.nodel.reflection.Serialisation`.
 - `TCPChannelClient.sendMessage` writes the JSON followed by `\r\n` — one
-  message per line (`TCPChannelClient.java`, ~line 223 onward).
+  message per line.
 - The receive side parses the byte stream incrementally with
-  `org/nodel/core/JSONStreamReader.java`.
+  `JSONStreamReader`.
 - `ChannelServerSocket` accepts connections for `TCPChannelServer`.
 
-The messaging TCP port is ephemeral by default
-(`BootstrapConfig.DEFAULT_MESSAGING_PORT = 0`) and advertised via discovery.
+The messaging TCP port is ephemeral by default (see the bootstrap table
+below) and advertised via discovery.
 
 ## Discovery: multicast on 224.0.0.252:5354
 
-`nodel-framework/src/main/java/org/nodel/discovery/`:
+Package `org.nodel.discovery`:
 
 - `Discovery.java` — constants: `MDNS_GROUP = 224.0.0.252`, `MDNS_PORT = 5354`.
 - `NodelAutoDNS.java` — the production implementation: advertises local nodes
@@ -55,39 +55,39 @@ The messaging TCP port is ephemeral by default
 
 ## PyNode: one interpreter per node, one global exec lock
 
-`nodel-jyhost/src/main/java/org/nodel/jyhost/PyNode.java` is a running node:
+`org.nodel.jyhost.PyNode` is a running node:
 
 - Each node constructs its own interpreter:
-  `_python = PythonInterpreter.threadLocalStateInterpreter(_globals)`
-  (~line 566). Node scripts therefore do not share globals — but they do share
-  the single Jython runtime bundled as `org.python:jython-standalone:2.5.4-rc1`.
+  `_python = PythonInterpreter.threadLocalStateInterpreter(_globals)`.
+  Node scripts therefore do not share globals — but they do share the host's
+  single bundled Jython runtime.
 - Script `exec` and `main()` calls are serialized **across all nodes** through
   a static `ReentrantLock` (`s_currentGlobalRentrantLock`, guarded by
-  `s_globalLock`, ~lines 110–160). The comment marks it as a workaround for a
-  Jython class-loading bug in the XML parser. `getAReentrantLock()` waits up
-  to 60 s; if the current holder takes longer, a *new* lock replaces the old
-  one so remaining nodes can initialise (the stuck node keeps the stale lock).
+  `s_globalLock`). The comment marks it as a workaround for a Jython
+  class-loading bug in the XML parser. `getAReentrantLock()` waits up to
+  60 s; if the current holder takes longer, a *new* lock replaces the old one
+  so remaining nodes can initialise (the stuck node keeps the stale lock).
 - Consequence: node startup is deliberately near-serial. Long-running work in
   a recipe's top level or `main()` stalls every other node's startup — keep
   that in mind when changing host startup or writing tests that create nodes.
 
 `NodelHost` (same package) scans the nodes directory and manages `PyNode`
-lifecycles; `BaseNode` (`org/nodel/host/BaseNode.java`) holds the
-host-agnostic node model (bindings, console, logs).
+lifecycles; `org.nodel.host.BaseNode` holds the host-agnostic node model
+(bindings, console, logs).
 
 ## REST: reflection-routed, no route table
 
-- HTTP server: `NodelHostHTTPD` (`org/nodel/jyhost/NodelHostHTTPD.java`)
-  `extends NanoHTTPD`. NanoHTTPD is **vendored** into the framework at
+- HTTP server: `org.nodel.jyhost.NodelHostHTTPD` `extends NanoHTTPD`.
+  NanoHTTPD is **vendored** into the framework at
   `nodel-framework/src/main/java/org/nanohttpd/` (HTTP + websocket protocol
   packages) — do not add it as an external dependency.
-- Routing: `REST.resolveRESTcall` (`org/nodel/rest/REST.java`) receives the
-  URL split into parts and walks them over a live object graph:
-  - `@Service` (`org/nodel/reflection/Service.java`) marks a field/method as a
-    sub-endpoint; methods take `@Param`-annotated arguments filled from query
-    params or the request body.
+- Routing: `REST.resolveRESTcall` (`org.nodel.rest.REST`) receives the URL
+  split into parts and walks them over a live object graph:
+  - `@Service` marks a field/method as a sub-endpoint; methods take
+    `@Param`-annotated arguments filled from query params or the request
+    body.
   - `@Value` marks plain data fields (also the serialization schema).
-  - Metadata is gathered/cached by `Reflection.java`
+  - Metadata is gathered/cached by `org.nodel.reflection.Reflection`
     (`getServiceInfosByName`, `getValueInfosByName`, `getDefaultService`).
 - So `GET /REST/nodes/<node>/console?from=0` resolves segment-by-segment from
   the root graph object to `BaseNode`'s `@Service(name = "console")` member.
@@ -116,15 +116,14 @@ host-agnostic node model (bindings, console, logs).
    the module JAR as classpath resource `org/nodel/host/content.zip`.
 
 At runtime the host extracts the embedded content into its working directory
-when the version changes or the directory is empty (`Launch.java`, ~line 364),
-so a stale-looking UI after a rebuild usually means the extraction check
-found an existing content directory.
+when the version changes or the directory is empty (`Launch`'s
+embedded-content check), so a stale-looking UI after a rebuild usually means
+that check found an existing content directory.
 
 ## Host bootstrap
 
 `org.nodel.jyhost.Launch` (main class, `nodel-jyhost/build.gradle
-application` block) parses `BootstrapConfig`
-(`org/nodel/host/BootstrapConfig.java`):
+application` block) parses `org.nodel.host.BootstrapConfig`:
 
 | Setting | Default | Flag |
 |---------|---------|------|

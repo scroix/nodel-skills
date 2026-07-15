@@ -1,12 +1,12 @@
 ---
 name: nodel-dev
-description: Develop the Nodel platform source itself - build the Java framework, Jython host, and web UI with Gradle, run a dev host, run Playwright integration/E2E tests, and navigate the core architecture. Use when modifying Nodel platform code (Java/web UI), not when writing recipes.
+description: Develop the Nodel platform source itself - build the Java framework, Jython host, and web UI with Gradle, run a dev host, and run the Playwright integration/E2E tests. Use when modifying Nodel platform code, not for writing recipes (nodel-recipes) or building node dashboards (nodel-frontend).
 ---
 
 # Nodel Platform Development
 
-For working on the Nodel source tree (github.com/museumsvictoria/nodel), not on
-recipes. The build has three Gradle modules (`settings.gradle`):
+For working on the Nodel source tree (github.com/museumsvictoria/nodel).
+Three Gradle modules (`settings.gradle`):
 
 | Module | What it is |
 |--------|------------|
@@ -19,28 +19,22 @@ not part of the Gradle build.
 
 ## Building
 
-Requires **JDK 11+** on PATH (the toolchain compiles with `options.release = 11`).
-The Gradle **8.14.5** wrapper (`gradle/wrapper/gradle-wrapper.properties`) fetches
-itself; never install Gradle manually.
+Requires JDK 11+ on PATH; always build through the wrapper (`./gradlew`,
+Gradle 8.14.5).
 
 ```bash
 ./gradlew build          # full build INCLUDING the whole test suite
-./gradlew build -x test  # build only (skips integration + E2E tests)
+./gradlew build -x test  # build only
 ```
 
 The runnable fat JAR lands in `nodel-jyhost/build/distributions/standalone/` as
-`nodelhost-<branch>-<version>-rev<N>.jar` (`fatJar` task; `build` is finalized by
-it). The first build downloads Node.js 20.12.0 and npm packages for the web UI.
+`nodelhost-<branch>-<version>-rev<N>.jar`. The first build downloads Node.js
+and npm packages for the web UI.
 
-### How the web UI gets into the JAR
-
-`nodel-webui-js` uses the `com.github.node-gradle.node` plugin: `npmInstall`
-(with `--legacy-peer-deps`) then `gruntRun` (npx `grunt`) compile `src/` into
-`build/grunt/`. The output is staged and zipped by `zipContentInterface` into
-`build/www-content/org/nodel/host/content.zip`, and `build/www-content` is the
-module's Java *resources* source dir — so the UI ships inside the JAR as a
-classpath resource. `compileJava`/`processResources` depend on the zip task; a
-UI change means rebuilding `nodel-webui-js`, not just `nodel-jyhost`.
+The web UI is Grunt-built and ships inside the JAR as classpath resource
+`org/nodel/host/content.zip` — so a UI change means rebuilding
+`nodel-webui-js`, not just `nodel-jyhost`. Pipeline details:
+`references/architecture.md`.
 
 ## Running a dev host
 
@@ -49,91 +43,63 @@ mkdir -p ~/nodel-dev && cd ~/nodel-dev   # host creates dirs in its cwd
 java -jar <repo>/nodel-jyhost/build/distributions/standalone/nodelhost-*-rev*.jar
 ```
 
-- Web interface on port **8085** by default (`BootstrapConfig.DEFAULT_NODELHOST_PORT`);
-  override with `-p <port>`.
-- Nodes live in `./nodes` (override `-r` / `--nodelRoot`); recipes in `./recipes`
-  (`--recipes`).
+- Web interface on port **8085**; override with `-p <port>`.
+- Nodes live in `./nodes` (`-r`/`--nodelRoot`); recipes in `./recipes` (`--recipes`).
 - Press Enter in the console to shut down cleanly.
-- Alternatively `./gradlew :nodel-jyhost:run` runs `org.nodel.jyhost.Launch`
-  directly with stdin wired up (but cwd is the module dir — it will litter
-  `nodel-jyhost/` with runtime dirs).
+- `./gradlew :nodel-jyhost:run` also works, but litters `nodel-jyhost/` with
+  runtime dirs since the module dir is its cwd.
 
 ## Testing
 
-Tests live in `nodel-jyhost/src/test/java/org/nodel/` and are JUnit 5 +
-Playwright 1.52.0 (Java). Gradle starts a real nodelhost on port **18085** in
-`nodel-jyhost/nodelhost-temp/` (`startNodelhost` task: kills anything on the
-port, waits up to 60 s for HTTP 200, logs to `output.log`/`error.log` there).
+JUnit 5 + Playwright tests in `nodel-jyhost/src/test/java/org/nodel/`. Gradle
+starts a real nodelhost on port **18085** in `nodel-jyhost/nodelhost-temp/`;
+on failure, read `output.log` and `error.log` there first.
 
 ```bash
 ./gradlew :nodel-jyhost:integrationTest   # everything NOT tagged @Tag("e2e")
 ./gradlew :nodel-jyhost:e2eTest           # only @Tag("e2e") user-journey tests
-./gradlew build -x test                   # skip the suite entirely
 ```
 
-The default `test` task (run by `build`) runs the full suite. First run may need
-Chromium: `./gradlew :nodel-jyhost:playwrightInstall`.
+First run may need Chromium: `./gradlew :nodel-jyhost:playwrightInstall`.
 
-### Watching the browser
-
-`HEADED` and `SLOWMO` are read by the test JVM but are **not Gradle task
-inputs** — always add `--rerun` or an up-to-date task silently skips:
+To watch the browser (`HEADED`/`SLOWMO` are not Gradle task inputs, so
+`--rerun` is mandatory — without it an up-to-date task silently skips):
 
 ```bash
 HEADED=1 SLOWMO=500 ./gradlew :nodel-jyhost:e2eTest --rerun
 ```
 
-Tests use `LocalAutoDNS` (in-JVM discovery, from `nodel-framework` test
-fixtures) for determinism; set `NODEL_TEST_DISCOVERY=1` to exercise real
-multicast. On failure check `nodel-jyhost/nodelhost-temp/{output,error}.log` and
-the HTML reports in `nodel-jyhost/build/reports/tests/`.
-
-See `references/testing.md` for the task wiring and debugging recipes.
+Host lifecycle, discovery fixtures, and debugging recipes:
+`references/testing.md`.
 
 ## Architecture essentials
 
-Full detail with file paths in `references/architecture.md`.
+One line each — full detail with file paths in `references/architecture.md`.
 
-- **Nodel points**: `NodelServers` publishes a node's local actions/events
-  (`NodelServerAction`/`NodelServerEvent`); `NodelClients` binds to remote ones
-  (`NodelClientAction`/`NodelClientEvent`). All in
-  `nodel-framework/src/main/java/org/nodel/core/`.
-- **Wire protocol**: `ChannelMessage` — a flat `@Value`-annotated class — is
-  serialized to JSON and sent one-message-per-CRLF-terminated-line over TCP
-  (`TCPChannelClient`/`TCPChannelServer`, parsed by `JSONStreamReader`).
-  Same-JVM bindings short-circuit through
-  `LoopbackChannelClient`/`LoopbackChannelServer`.
-- **Discovery**: multicast group **224.0.0.252 : 5354** (`Discovery.MDNS_GROUP`
-  / `MDNS_PORT`), implemented by `NodelAutoDNS`; the implementation is pluggable
+- **Nodel points**: `NodelServers` publishes a node's local actions/events;
+  `NodelClients` binds to remote ones (package `org.nodel.core`).
+- **Wire protocol**: line-delimited JSON (`ChannelMessage`) over TCP; same-JVM
+  bindings short-circuit through loopback channels.
+- **Discovery**: multicast on **224.0.0.252:5354**; implementation pluggable
   via system property `org.nodel.discovery.impl` (how tests inject
   `LocalAutoDNS`).
-- **PyNode** (`nodel-jyhost`): each node gets its own
-  `PythonInterpreter.threadLocalStateInterpreter(...)`. Script `exec` and
-  `main()` calls across ALL nodes are serialized through one static global
-  `ReentrantLock` (Jython XML-parser loading bug workaround); if a node holds
-  it > 60 s the lock is replaced so others can proceed. Anything touching node
-  startup ordering must respect this.
-- **REST**: `NodelHostHTTPD` extends a vendored NanoHTTPD
-  (`nodel-framework/src/main/java/org/nanohttpd/`). There is no route table:
-  `REST.resolveRESTcall` walks URL path segments over the live object graph
-  using reflection metadata from `@Service` (sub-endpoints/methods), `@Value`
-  (fields), and `@Param` (method args) annotations. Adding an endpoint =
-  annotating a member on a reachable object (see `BaseNode` for examples).
+- **PyNode**: one Jython interpreter per node, but script `exec`/`main()`
+  calls across ALL nodes are serialized through one global lock — node startup
+  is near-serial; respect this when touching startup ordering.
+- **REST**: `NodelHostHTTPD` extends a vendored NanoHTTPD, and there is no
+  route table — URL segments are resolved over the live object graph via
+  `@Service`/`@Value`/`@Param` annotations, so adding an endpoint means
+  annotating a member on a reachable object.
 
 ## Conventions
 
-- **License header**: every Java source starts with the MPL 2.0 comment block
-  immediately after the `package` statement — copy it from any existing file.
-- **Name reduction**: node/action/event names are matched case-, space- and
-  punctuation-insensitively. `Nodel.reduce` keeps letters/digits, strips
-  `(...)` comments (nested) and truncates at `--` or `//`; `SimpleName` holds
-  original + reduced forms and compares via the flattened (lowercased) one.
-  Never compare raw name strings.
-- **Callbacks**: use the `Handler.H0`–`H5` / `F0`–`F3` interfaces
-  (`org.nodel.Handler`) with the null-safe static `Handler.handle(...)`
-  dispatchers; `Handlers` manages multi-subscriber lists.
-- **Serialization = API surface**: `@Value`/`@Service` annotations drive both
-  JSON serialization (`Serialisation`) and the REST tree — renaming an
-  annotation's `name` is a wire/API-breaking change.
+Examples for each in `references/conventions.md`.
 
-See `references/conventions.md` for examples of each.
+- Every Java file carries the MPL 2.0 header immediately *after* the
+  `package` statement.
+- Node/action/event names match case/space/punctuation-insensitively — never
+  compare raw name strings; wrap in `SimpleName`.
+- Callbacks use the `org.nodel.Handler` interfaces with the null-safe static
+  `Handler.handle(...)` dispatchers.
+- `@Value`/`@Service` annotation names are wire format AND REST surface —
+  renaming one is a breaking change.

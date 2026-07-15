@@ -18,8 +18,6 @@ E2E classes carry `@Tag("e2e")` (e.g. `E2EUserJourneyTests`,
 `TestBase`, which hard-codes `BASE_URL = http://127.0.0.1:18085` and creates
 the Playwright browser.
 
-Skip the suite entirely with `./gradlew build -x test`.
-
 ## The test host lifecycle
 
 Every test task `dependsOn 'startNodelhost'` and is `finalizedBy
@@ -35,8 +33,7 @@ Every test task `dependsOn 'startNodelhost'` and is `finalizedBy
 4. Gradle polls `http://127.0.0.1:18085/` for up to 60 s; failure to reach
    HTTP 200 aborts with a pointer at the two log files.
 
-So the tests exercise a genuine nodelhost — nodes created during tests appear
-under `nodelhost-temp/nodes/`.
+Nodes created during tests appear under `nodelhost-temp/nodes/`.
 
 ## Discovery in tests
 
@@ -47,7 +44,7 @@ of `nodel-framework` and put on the host classpath via the `discoveryFixture`
 configuration — it never ships in a production JAR. The suite fails fast if
 it didn't load.
 
-To exercise real multicast discovery (224.0.0.252:5354):
+To exercise real multicast discovery:
 
 ```bash
 NODEL_TEST_DISCOVERY=1 ./gradlew :nodel-jyhost:integrationTest \

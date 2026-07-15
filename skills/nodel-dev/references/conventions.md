@@ -67,9 +67,8 @@ public LogEntry[] getLogs(
         int max) { ... }
 ```
 
-(from `org/nodel/host/BaseNode.java` — reachable as
-`GET /REST/nodes/<node>/logs?from=0&max=100`; `NodelHostHTTPD` dispatches any
-URL whose first segment is `REST` through the reflection walker)
+(from `org.nodel.host.BaseNode` — reachable as
+`GET /REST/nodes/<node>/logs?from=0&max=100`)
 
 Implications:
 
@@ -77,8 +76,6 @@ Implications:
   public REST surface — renaming one is a breaking change for every peer and
   UI build in the field.
 - `order =` on `@Value` controls JSON field ordering (see `ChannelMessage`).
-- Adding a REST endpoint means annotating a member on an object reachable
-  from the HTTPD's root graph — there is no route registration file.
 
 ## Misc
 
