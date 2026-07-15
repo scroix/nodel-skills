@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Nodel Platform Dev</title>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#24303C"/>
+  <path d="M96 80 48 128l48 48" fill="none" stroke="#8492A5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m160 80 48 48-48 48" fill="none" stroke="#8492A5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="128" r="24" fill="none" stroke="#C2D867" stroke-width="10"/>
+  <path d="M128 96V82M128 160v14M160 128h14M96 128H82" fill="none" stroke="#C2D867" stroke-width="10" stroke-linecap="round"/>
+</svg>
