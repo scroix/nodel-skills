@@ -2,6 +2,8 @@
 
 Complete reference for the Nodel Python toolkit available in node scripts.
 
+Toolkit signatures are verified against `nodel-jyhost/src/main/resources/org/nodel/jyhost/nodetoolkit.py`. Examples for the less obvious APIs cite the official Nodel recipe they were lifted or adapted from.
+
 ## Parameters
 
 Define configurable values that appear in the node's web interface.
@@ -108,6 +110,27 @@ if existing:
 Action('Preset 2', lambda arg: activate_preset(2), {'group': 'Presets'})
 ```
 
+### Action Timestamps
+
+`getTimestamp()` returns the Joda-Time `DateTime` for the most recent action call, or `None` if the action has not been called. This makes it possible to enforce a requested state for a bounded period and then let observed device state win.
+
+```python
+local_event_DesiredPower = LocalEvent({
+    'schema': {'type': 'string', 'enum': ['On', 'Off']}
+})
+
+@local_action({'schema': {'type': 'string', 'enum': ['On', 'Off']}})
+def Power(arg):
+    local_event_DesiredPower.emit(arg)
+
+def was_power_requested_recently(max_age_seconds):
+    last_action = Power.getTimestamp() or date_parse('1990')
+    age_millis = date_now().getMillis() - last_action.getMillis()
+    return age_millis <= max_age_seconds * 1000
+```
+
+Source recipe: official `Grandview motorised screen over HTTP/script.py` (adapted from its bounded power synchronisation window).
+
 ### Remote Actions
 
 Call actions on other nodes:
@@ -181,6 +204,23 @@ event.addEmitHandler(on_emit)
 # Legacy alias (still supported)
 legacy_event = Event('Channel 2 Level', {'group': 'Channels'})
 ```
+
+### Emit Handlers and Immediate Persistence
+
+`addEmitHandler(handler)` calls `handler(arg)` after the event emits. `persistNow()` asks Nodel to persist the event's latest value immediately rather than waiting for relaxed background persistence.
+
+```python
+local_event_DesiredPower = LocalEvent({
+    'schema': {'type': 'string', 'enum': ['On', 'Off']}
+})
+
+@after_main
+def persist_desired_power():
+    local_event_DesiredPower.addEmitHandler(
+        lambda arg: local_event_DesiredPower.persistNow())
+```
+
+Source recipe: official `App Launcher/script.py` (adapted from `ensurePersistSignals`).
 
 ### Remote Events
 
@@ -337,21 +377,49 @@ if _isConnected:
 tcp.close()
 ```
 
+#### Queued Request/Response
+
+`tcp.request(msg, callback)` sends `msg` through the managed request queue and passes the corresponding received frame to `callback`. Use it when each command has one response; unsolicited traffic should use the connection's `received=` callback instead.
+
+```python
+def handle_power_response(response):
+    console.info('Power response: [%s]' % response)
+
+tcp = TCP(
+    dest='192.168.1.100:23',
+    sendDelimiters='\r',
+    receiveDelimiters='\r')
+
+def poll_power():
+    tcp.request('PW?', handle_power_response)
+
+Timer(poll_power, 10)
+```
+
+Source recipe: official `Denon AV Receiver (AVR-X4100W)/script.py` (adapted from its zone power polling).
+
 ### UDP
 
 ```python
-udp = UDP(
-    dest='192.168.1.100:9999',
-    received=on_packet
-)
+def on_ready():
+    console.info('UDP listener ready')
 
-def on_packet(src, data):
-    # src is source address:port
-    console.info('From %s: %s' % (src, data))
+def on_packet(source, data):
+    console.info('From %s: %s' % (source, data))
+
+udp = UDP(
+    source='239.255.250.250:9131',
+    dest='239.255.250.250:9131',
+    ready=on_ready,
+    received=on_packet)
 
 udp.send('DISCOVER')
 udp.close()
 ```
+
+The zero-argument `ready=` callback runs when the managed UDP endpoint is ready. A `received=` callback accepts `(source, data)`.
+
+Source recipe: official `AMX beacon receiver/script.py` (adapted from `multicast_ready` and `multicast_received`).
 
 ### SSH
 
@@ -418,41 +486,104 @@ _toolkit.getHttpClient().setIgnoreSSL(True)
 
 ### Long-running Process
 
-```python
-# Process with auto-restart
-process = Process(['tail', '-f', '/var/log/syslog'],
-    stdout=on_stdout,
-    stderr=on_stderr,
-    started=on_started,
-    stopped=on_stopped)
+`Process` is managed and remains running after `start()` until `stop()` is called. `setCommand()` accepts the executable and arguments as a list; `setWorking()` sets the child process working directory. `close()` permanently disposes the managed process.
 
-def on_stdout(line):
+```python
+param_AppPath = Parameter({
+    'title': 'Application path',
+    'required': True,
+    'schema': {'type': 'string'}
+})
+param_AppWorkingDir = Parameter({
+    'title': 'Working directory',
+    'schema': {'type': 'string'}
+})
+
+def process_started():
+    console.info('Application started')
+
+def process_stopped(exit_code):
+    console.info('Application stopped with exit code %s' % exit_code)
+
+def process_stdout(line):
     console.log('OUT: %s' % line)
 
-def on_stderr(line):
+def process_stderr(line):
     console.warn('ERR: %s' % line)
 
-process.close()
+_process = Process(
+    None,
+    started=process_started,
+    stdout=process_stdout,
+    stderr=process_stderr,
+    stopped=process_stopped)
+
+@after_main
+def configure_process():
+    _process.stop()
+    if is_blank(param_AppPath):
+        console.error('Application path is required')
+        return
+
+    _process.setWorking(param_AppWorkingDir or None)
+    _process.setCommand([param_AppPath])
+
+@local_action({'schema': {'type': 'string', 'enum': ['On', 'Off']}})
+def ProcessPower(arg):
+    if arg == 'On':
+        _process.start()
+    else:
+        _process.stop()
+
+@at_cleanup
+def dispose_process():
+    _process.close()
 ```
+
+Source recipe: official `App Launcher/script.py` (adapted from `finishMain`, `Power`, and its managed `_process`).
 
 ### Quick Process
 
 ```python
 # One-shot command
-quick_process(['ls', '-la'],
-    finished=on_complete,
-    working='/tmp')
-
 def on_complete(result):
     console.info('Exit: %d' % result.code)
     console.info('Stdout: %s' % result.stdout)
     console.info('Stderr: %s' % result.stderr)
+
+quick_process(['ls', '-la'],
+    finished=on_complete,
+    working='/tmp')
 
 # With list arguments
 quick_process(['git', 'status'],
     working='/opt/myproject',
     finished=lambda r: console.info(r.stdout))
 ```
+
+`stdinPush` writes text to the child process's standard input immediately after launch. The child must know when to finish; this PowerShell adaptation includes an explicit `exit` because the managed helper does not use an interactive terminal.
+
+```python
+POWERSHELL_QUERY = (
+    'Get-CimInstance -ClassName Win32_ComputerSystem '
+    '| Select-Object TotalPhysicalMemory | ConvertTo-Json\n'
+    'exit\n')
+
+@local_action({})
+def PhysicalMemory(arg=None):
+    def finished(result):
+        if result.code != 0:
+            console.error('PowerShell failed: %s' % result.stderr)
+            return
+        console.info('Physical memory: %s' % result.stdout.strip())
+
+    quick_process(
+        ['powershell', '-NoProfile', '-Command', '-'],
+        stdinPush=POWERSHELL_QUERY,
+        finished=finished)
+```
+
+Source recipe: official `Diagnostics/Windows Excessive Resource Use Diagnostics/script.py` (its `quick_process` PowerShell query adapted to use the toolkit's `stdinPush` parameter).
 
 ## Utilities
 
@@ -468,22 +599,30 @@ obj = json_decode('{"key": "value"}')
 
 ### Date/Time
 
+`date_now()` and `date_parse()` return Joda-Time `DateTime` values. Both support `.getMillis()` and `.toString(pattern)`.
+
 ```python
-# Current datetime
+# date_now() and date_parse() return Joda-Time DateTime objects
 now = date_now()
+previous_contact = date_parse('2024-01-15T10:30:00.000+11:00')
 
-# Format datetime
-formatted = now.toString('yyyy-MM-dd HH:mm:ss')
+# Milliseconds since the epoch, suitable for elapsed-time arithmetic
+elapsed_millis = now.getMillis() - previous_contact.getMillis()
 
-# Parse datetime
-parsed = date_parse('2024-01-15T10:30:00')
+# Joda-Time pattern formatting works on either result
+console.info('Checked at %s; previous contact was %s (%s ms ago)' % (
+    now.toString('yyyy-MM-dd HH:mm:ss'),
+    previous_contact.toString('h:mm:ss a, E d-MMM'),
+    elapsed_millis))
 
 # Monotonic high-resolution clock in milliseconds (not epoch time; it can wrap)
-millis = system_clock()
+monotonic_millis = system_clock()
 
 # Create datetime from epoch milliseconds
-instant = date_instant(millis)
+instant = date_instant(now.getMillis())
 ```
+
+Source recipes: official `Calendar/script.py` (parsed event milliseconds) and `Extron G2 series controllers/script.py` (elapsed time and formatted last contact), adapted into one standalone example.
 
 ### String Utilities
 
@@ -557,3 +696,21 @@ sub = Subnode('Diagnostics')
 release_node(child)
 release_node(sub)
 ```
+
+### Node Root and Restart
+
+`_node.getRoot()` returns the Java `File` for the current node directory. `_node.restart()` gracefully reloads the current node; delay it when a preceding operation still needs to finish.
+
+```python
+@local_action({})
+def RestartNode(arg=None):
+    root = _node.getRoot()
+    if root is None:
+        console.warn('This node has no file-backed root')
+        return
+
+    console.info('Restarting node at %s' % root.getAbsolutePath())
+    call(lambda: _node.restart(), delay=2.5)
+```
+
+Source recipe: official `OSC Client/script.py` (adapted from its dependency-write and delayed restart flow).

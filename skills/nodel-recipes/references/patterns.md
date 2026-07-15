@@ -132,6 +132,84 @@ def enforce_state():
         _settleTimer.stop()
 ```
 
+### Power State Arbitration via Action/Event Timestamps
+
+Keep raw device feedback, desired state, and effective power separate. For a short window after the `Power` action is called, desired state wins and a mismatch is exposed as `Partially On` or `Partially Off`. Once that action timestamp is stale, raw feedback wins. During reconciliation, require both the action and effective-event timestamps to remain inside the window: the action is the hard cap, while the event prevents retrying a stale effective state.
+
+```python
+REQUEST_WINDOW_SECONDS = 60
+
+local_event_RawPower = LocalEvent({
+    'schema': {'type': 'string', 'enum': ['On', 'Off']}
+})
+local_event_DesiredPower = LocalEvent({
+    'schema': {'type': 'string', 'enum': ['On', 'Off']}
+})
+local_event_Power = LocalEvent({
+    'schema': {
+        'type': 'string',
+        'enum': ['On', 'Partially On', 'Partially Off', 'Off', 'Unknown']
+    }
+})
+
+def send_power(value):
+    console.info('Send power %s to the device' % value)
+
+@local_action({'schema': {'type': 'string', 'enum': ['On', 'Off']}})
+def Power(arg):
+    local_event_DesiredPower.emit(arg)
+    send_power(arg)
+    timer_power_syncer.start()
+
+def update_effective_power(ignore):
+    raw = local_event_RawPower.getArg()
+    desired = local_event_DesiredPower.getArg()
+
+    action_timestamp = Power.getTimestamp()
+    if action_timestamp is None:
+        action_age = REQUEST_WINDOW_SECONDS * 1000 + 1
+    else:
+        action_age = date_now().getMillis() - action_timestamp.getMillis()
+
+    if action_age > REQUEST_WINDOW_SECONDS * 1000 or desired is None:
+        effective = raw or 'Unknown'
+    elif desired == raw:
+        effective = raw
+    else:
+        effective = 'Partially %s' % desired
+
+    local_event_Power.emit(effective)
+
+def enforce_recent_request():
+    action_timestamp = Power.getTimestamp()
+    event_timestamp = local_event_Power.getTimestamp()
+    if action_timestamp is None or event_timestamp is None:
+        timer_power_syncer.stop()
+        return
+
+    action_age = date_now().getMillis() - action_timestamp.getMillis()
+    event_age = date_now().getMillis() - event_timestamp.getMillis()
+    if (action_age > REQUEST_WINDOW_SECONDS * 1000 or
+            event_age > REQUEST_WINDOW_SECONDS * 1000):
+        timer_power_syncer.stop()
+        return
+
+    raw = local_event_RawPower.getArg()
+    desired = local_event_DesiredPower.getArg()
+    if desired is not None and raw != desired:
+        send_power(desired)
+
+timer_power_syncer = Timer(enforce_recent_request, 5, stopped=True)
+
+@after_main
+def bind_power_arbitration():
+    local_event_RawPower.addEmitHandler(update_effective_power)
+    local_event_DesiredPower.addEmitHandler(update_effective_power)
+    update_effective_power(None)
+```
+
+Source recipe: official `NEC Display/Mk1/script.py` (adapted from `bindPowerSignals` and `powerSyncer`). The same bounded-action approach appears in official `Grandview motorised screen over HTTP`, `Sony SSIP protocol for displays`, `Panasonic Display/Mk1`, and `Sharp monitor/Mk2` recipes.
+
 ### Raw Socket / Binary Protocol
 
 ```python
