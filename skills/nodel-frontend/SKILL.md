@@ -5,416 +5,77 @@ description: Build custom frontends and dashboards for Nodel nodes using index.x
 
 # Nodel Frontend Development
 
-## Frontend File Structure
+Build and revise the XML dashboards served from a Nodel node's `content` directory.
 
-A node's frontend is defined in its folder:
+## Workflow
 
-```
+1. Inspect the node's actions, events, and existing `content` files before choosing controls.
+2. Create or update `content/index.xml`, keeping custom CSS and JavaScript optional.
+3. Start with the minimal dashboard below and bind components to the node's real action and event names.
+4. Read the component reference before choosing tags or relying on an attribute.
+5. Read the pattern guide when composing a complete dashboard, adding custom styling, or handling dynamic behavior.
+6. Render the page against a running Nodel node and check the browser console as well as the node console.
+
+## File Layout
+
+```text
 nodes/My Node/
-├── script.py              # Node logic
-├── nodeConfig.json        # Node config and bindings
-└── content                # Web root
-    ├── index.xml          # Frontend definition
+├── script.py
+├── nodeConfig.json
+└── content
+    ├── index.xml
     ├── css
-    |   └── custom.css     # Custom styles (optional)
+    │   └── custom.css
     └── js
-        └── custom.js      # Custom JavaScript (optional)
+        └── custom.js
 ```
 
-## Basic Dashboard Structure
+## Minimal Dashboard
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="v1/index.xsl"?>
-<pages title='Dashboard Title' css='css/custom.css' js='js/custom.js'>
+<pages title='Dashboard' css='css/custom.css' js='js/custom.js'>
   <page title='Main'>
     <row>
-      <column sm="6">
-        <!-- Left column content -->
-      </column>
-      <column sm="6">
-        <!-- Right column content -->
+      <column xs='12' sm='6'>
+        <title>Power</title>
+        <button action='Power' arg='On'>Turn On</button>
+        <status event='Power'>Current power</status>
       </column>
     </row>
   </page>
-  <page title='Settings'>
-    <!-- Another page -->
-  </page>
 </pages>
 ```
 
-### Root Attributes
+Remove the `css` or `js` attribute when the corresponding file does not exist.
 
-| Attribute | Purpose |
-|-----------|---------|
-| `title` | Dashboard title in header |
-| `theme` | Passed through to Bootstrap navbar classes and theme CSS selection |
-| `logo` | Custom logo image path |
-| `css` | Custom CSS file path |
-| `js` | Custom JavaScript file path |
-| `core` | Core/admin mode (skips custom `css` / `js` loading) |
+## Critical Renderer Constraints
 
-## Layout System
+- Keep the `v1/index.xsl` processing instruction. Nodel transforms the XML through that stylesheet.
+- Use the stock component tags and attributes instead of assuming arbitrary HTML passes through.
+- Lay out pages with the Bootstrap 3 twelve-column grid (`xs`, `sm`, `md`, and `lg`).
+- Use `<image source='...'>`, not `<img>`. Always provide `source`, including for event-backed images.
+- Place `<input>` directly under `<header>`; the built-in rendered input type is `checkbox`.
+- Put `<row>` elements directly under `<footer>`.
+- Setting `core` on `<pages>` skips custom CSS and JavaScript loading.
+- Do not listen for a `nodel-event` DOM event. The renderer updates bound elements directly; observe the property it changes when custom JavaScript must react.
 
-### Grid System
+## Binding Conventions
 
-Uses Bootstrap 3 grid (12 columns):
+- Use `event` to display node state and `action` to send a value.
+- Use `join` when the action and event share a name.
+- Use `data` for dynamic option or button collections emitted by the node.
+- Use `showevent` and `showvalue` for conditional visibility. Some layout components also support `event` and `value`.
 
-```xml
-<row>
-  <column sm="12">Full width on small+ screens</column>
-</row>
+## References
 
-<row>
-  <column sm="6">Half width</column>
-  <column sm="6">Half width</column>
-</row>
+- Read [`references/components.md`](references/components.md) when selecting a component, checking supported children, or confirming attributes, sizing, bindings, and renderer caveats.
+- Read [`references/patterns.md`](references/patterns.md) when assembling full dashboards, admin locks, dynamic controls, responsive layouts, confirmation flows, or custom CSS and JavaScript.
 
-<row>
-  <column sm="3">Quarter</column>
-  <column sm="3">Quarter</column>
-  <column sm="3">Quarter</column>
-  <column sm="3">Quarter</column>
-</row>
-```
+## Completion Check
 
-Breakpoints:
-- `xs` - Extra small (phones)
-- `sm` - Small (tablets)
-- `md` - Medium (desktops)
-- `lg` - Large (large desktops)
-
-### Groups
-
-Visual grouping with background:
-
-```xml
-<group>
-  <title>Power Control</title>
-  <button action="Power" arg="On">Turn On</button>
-  <button action="Power" arg="Off">Turn Off</button>
-</group>
-```
-
-### Page Groups
-
-Dropdown navigation for many pages:
-
-```xml
-<pagegroup title='Meeting Rooms'>
-  <page title='Room A'>...</page>
-  <page title='Room B'>...</page>
-  <page title='Room C'>...</page>
-</pagegroup>
-```
-
-## UI Components
-
-See `references/components.md` for complete component reference.
-
-Notes:
-- Use `<image source='...'>` for images (`<img>` is not a supported component tag).
-- `<input>` is header-only (place directly under `<header>`; checkbox is the built-in rendered type).
-- `<footer>` should contain `<row>` children.
-
-### Buttons
-
-```xml
-<!-- Simple action button -->
-<button action='Power' arg='On' class='btn-success'>Turn On</button>
-
-<!-- Confirmation before action -->
-<button action='Reboot' confirm='true'>Reboot</button>
-
-<!-- PIN confirmation -->
-<button action='AdminMode' confirm='code' arg='true'>Unlock</button>
-
-<!-- Momentary button (on while pressed) -->
-<button type='momentary' action-on='VolumeUp' action-off='VolumeStop'>Vol +</button>
-
-<!-- Multiple actions -->
-<button action='["Action1","Action2","Action3"]'>Multiple</button>
-```
-
-### Button Groups
-
-```xml
-<buttongroup>
-  <button action='Source' arg='HDMI1'>HDMI 1</button>
-  <button action='Source' arg='HDMI2'>HDMI 2</button>
-  <button action='Source' arg='DP1'>DisplayPort</button>
-</buttongroup>
-```
-
-### Switches
-
-```xml
-<!-- On/Off toggle -->
-<switch event='Power' action='Power' class='btn-primary'/>
-
-<!-- Partial switch (shows current state) -->
-<partialswitch event='Power' action='Power'/>
-
-<!-- With confirmation -->
-<partialswitch event='Power' action='Power' confirm='true'/>
-```
-
-### Pills (Radio Buttons)
-
-```xml
-<pills event='Source' action='Source'>
-  <pill value='HDMI1'>HDMI 1</pill>
-  <pill value='HDMI2'>HDMI 2</pill>
-  <pill value='DP1'>DisplayPort</pill>
-</pills>
-```
-
-### Select Dropdown
-
-```xml
-<select event='Source' action='Source' class='btn-default'>
-  <item value='HDMI1'>HDMI 1</item>
-  <item value='HDMI2'>HDMI 2</item>
-  <item value='DP1'>DisplayPort</item>
-</select>
-
-<!-- Dynamic options from node -->
-<dynamicselect data='SourceList' event='Source' action='Source'/>
-```
-
-### Range Slider
-
-```xml
-<!-- Basic slider -->
-<range event='Volume' action='Volume' min='0' max='100'/>
-
-<!-- With mute button -->
-<range event='Volume' action='Volume' type='mute' min='0' max='100'/>
-
-<!-- Vertical slider -->
-<range event='Volume' action='Volume' type='vertical' height='250'/>
-
-<!-- With nudge buttons -->
-<range event='Volume' action='Volume' min='0' max='100' nudge='5'/>
-```
-
-Behavior details:
-- `type='mute'` creates a mute toggle bound to `{baseName}Muting` (for `Volume`, bind `VolumeMuting`).
-- `nudge` buttons only appear if `action` or `join` is present.
-
-### Status Display
-
-```xml
-<!-- Status box with event binding -->
-<status event='DeviceStatus'>Device Status</status>
-
-<!-- With badge -->
-<status event='Status1'>
-  <badge event='OnlineStatus'/>
-  Main Status
-</status>
-
-<!-- With link -->
-<status event='Status'>
-  <link url='http://device.local'>Open Device</link>
-  Status text here
-</status>
-```
-
-### Meters
-
-```xml
-<meter event='AudioLevel'/>
-<meter event='CPUUsage'/>
-<meter event='dBLevel' range='db'/>
-```
-
-### Text Display
-
-```xml
-<title>Section Title</title>
-<subtitle>Section Subtitle</subtitle>
-<text>Descriptive text here</text>
-<field event='CurrentValue'/>
-<panel height='100' event='LongText'/>
-```
-
-## Conditional Visibility
-
-Show/hide elements based on event values:
-
-```xml
-<!-- Show only when Power is "On" -->
-<button showevent='Power' showvalue='On' action='Settings'>Settings</button>
-
-<!-- Show when Power is "On" OR "Standby" -->
-<column showevent='Power' showvalue='["On","Standby"]'>
-  ...
-</column>
-
-<!-- Column visibility -->
-<column sm='6' event='AdminMode' value='true'>
-  Admin-only controls
-</column>
-```
-
-## Icons
-
-Using Font Awesome icons:
-
-```xml
-<button action='Power' arg='On'>
-  <icon lib='fa' type='power-off' style='fas'/>
-</button>
-
-<button action='VolumeUp'>
-  <icon lib='fa' type='volume-up' size='2' style='fas'/>
-</button>
-```
-
-Icon attributes:
-- `lib` - Icon library (`fa` for Font Awesome)
-- `type` - Icon name (e.g., `power-off`, `volume-up`)
-- `style` - Icon style (`fas` solid, `far` regular)
-- `size` - Size multiplier (1-5)
-
-## Badges
-
-Status indicators:
-
-```xml
-<button action='Source'>
-  <badge event='SourceOnline'/>
-  Select Source
-</button>
-
-<status event='MainStatus'>
-  <badge event='SubStatus'/>
-  <partialbadge event='PartialStatus'/>
-  Status Text
-</status>
-```
-
-## QR Codes
-
-```xml
-<qrcode text='https://example.com' height='128'/>
-<qrcode event='DynamicURL' height='128' help='Scan to connect'/>
-```
-
-## Header Customization
-
-```xml
-<pages title='My Dashboard'>
-  <header>
-    <nodel type='nav'/>    <!-- Node navigation dropdown -->
-    <nodel type='edit'/>   <!-- Edit functions dropdown -->
-    <input type='checkbox' event='AdminMode' action='AdminMode'>Admin</input>
-    <button action='Refresh'>Refresh</button>
-  </header>
-  ...
-</pages>
-```
-
-## Custom Styling
-
-### custom.css
-
-```css
-/* Override button colors */
-.btn-power-on {
-  background-color: #4CAF50;
-}
-
-/* Blur images until hover */
-img {
-  filter: blur(5px);
-  transition: filter 0.3s ease;
-}
-img:hover {
-  filter: blur(0);
-}
-
-/* Custom status colors */
-.status-warning {
-  background-color: #ff9800;
-}
-```
-
-### custom.js
-
-```javascript
-$(document).ready(function() {
-  // Nodel renders <text event="DeviceStatus"> as an element with
-  // data-event="DeviceStatus", then updates its text when the event arrives.
-  var target = document.querySelector('[data-event="DeviceStatus"]');
-  if (!target) return;
-
-  var lastValue;
-  function handleRenderedValue() {
-    var value = target.textContent;
-    if (value === lastValue) return;
-    lastValue = value;
-    console.log('DeviceStatus:', value);
-  }
-
-  new MutationObserver(handleRenderedValue).observe(target, {
-    childList: true,
-    characterData: true,
-    subtree: true
-  });
-  handleRenderedValue();
-});
-```
-
-There is no `nodel-event` DOM event. The renderer adds `nodel-event` as a CSS class to elements with `data-event`, and `process_event` updates the rendered element directly. Observe the specific DOM property that the stock renderer changes (text in the example above, or `src` for an event-backed image).
-
-## Common Patterns
-
-### Admin Lock
-
-```xml
-<button join='AdminEnabled' confirm='code' arg='true' showevent='AdminDisabled'>
-  <icon lib='fa' type='lock' style='fas'/>
-</button>
-<button join='AdminEnabled' arg='false' showevent='AdminEnabled'>
-  <icon lib='fa' type='lock-open' style='fas'/>
-</button>
-```
-
-Supporting script.py code:
-```python
-local_event_AdminEnabled = LocalEvent({'schema': {'type': 'boolean'}})
-local_event_AdminDisabled = LocalEvent({'schema': {'type': 'boolean'}})
-
-@local_action({})
-def AdminEnabled(arg):
-    local_event_AdminEnabled.emit(arg)
-    local_event_AdminDisabled.emit(not arg)
-```
-
-### Dynamic Button Group
-
-```xml
-<dynamicbuttongroup join='Source' data='sourceData' confirmtext='Switch source?'/>
-```
-
-### Multi-Page Dashboard
-
-```xml
-<pages title='AV Control'>
-  <page title='Sources'>
-    <!-- Source selection controls -->
-  </page>
-  <page title='Audio'>
-    <!-- Audio controls -->
-  </page>
-  <page title='Lighting'>
-    <!-- Lighting controls -->
-  </page>
-  <pagegroup title='Advanced'>
-    <page title='Network'>...</page>
-    <page title='Debug'>...</page>
-  </pagegroup>
-</pages>
-```
+- Confirm every bound action and event exists on the target node.
+- Confirm optional asset paths match the `content` directory layout.
+- Check the page at phone and desktop widths when the layout is responsive.
+- Treat XML/XSL errors and browser-console errors as implementation failures.

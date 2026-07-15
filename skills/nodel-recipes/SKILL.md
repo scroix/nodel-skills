@@ -5,189 +5,82 @@ description: Write Nodel node recipes (script.py) using Jython 2.5 - define acti
 
 # Nodel Recipe Development
 
-## Critical: Jython 2.5 Syntax
+Create and revise Nodel `script.py` recipes for device control, automation, and integration work.
 
-Node scripts execute under the bundled Jython 2.5.4-rc1 runtime. You MUST use Python 2.5-era syntax:
+## Workflow
+
+1. Inspect the existing recipe, parameter values, bindings, and node logs before changing behavior.
+2. Define parameters and public action/event schemas before protocol or device logic.
+3. Initialize connections and timers only after parameters are available.
+4. Keep protocol callbacks small: parse input, update connection state, and emit stable events.
+5. Add cleanup for long-running connections, timers, or processes.
+6. Exercise the recipe on a disposable or non-production node and inspect `err` console entries.
+
+## Recipe Layout
+
+```text
+My Recipe/
+├── script.py
+└── content
+    ├── index.xml
+    ├── css
+    │   └── custom.css
+    └── js
+        └── custom.js
+```
+
+Only `script.py` is required.
+
+## Critical Runtime Constraint
+
+Nodel runs node scripts with the bundled Jython 2.5.4-rc1 runtime. Use Python 2.5-era syntax and APIs.
 
 ```python
-# CORRECT - Python 2.5 syntax
+try:
+    value = int('42')
 except Exception, e:
-    console.error('Error: %s' % e)
-
-# WRONG - Python 3 syntax (will fail)
-except Exception as e:
-    console.error(f'Error: {e}')
+    console.error('Operation failed: %s' % e)
 ```
 
-See `references/jython-syntax.md` for complete syntax reference.
+Do not use Python 3 exception syntax, f-strings, dictionary comprehensions, set literals, or APIs added after Python 2.5. Do not assume CPython packages are available.
 
-## Recipe File Structure
-
-A node recipe lives in a folder containing:
-- `script.py` - Main recipe logic (required)
-- `content/index.xml` - Custom frontend definition (optional)
-- `content/css/custom.css` - Custom styles (optional)
-- `content/js/custom.js` - Custom JavaScript (optional)
-
-## Core Concepts
-
-### Parameters
-
-Configure node behavior via the web interface:
+## Minimal Recipe Shape
 
 ```python
-param_ipAddress = Parameter({'title': 'IP Address', 'schema': {'type': 'string'}})
-param_port = Parameter({'title': 'Port', 'schema': {'type': 'integer'}, 'default': 9999})
-```
+param_ipAddress = Parameter({
+    'title': 'IP Address',
+    'schema': {'type': 'string'}
+})
 
-### Local Actions
+local_event_Status = LocalEvent({'schema': {'type': 'string'}})
 
-Commands this node exposes (can be triggered by bindings or REST API):
+@local_action({'schema': {'type': 'string'}})
+def Power(arg):
+    local_event_Status.emit(arg)
 
-```python
-@local_action({'schema': {'type': 'string', 'enum': ['On', 'Off']}})
-def power(arg):
-    '''{"group": "Power", "order": 1}'''
-    tcp.send('POWER %s\r\n' % arg)
-```
-
-Alternative pattern:
-- Naming convention also works: `def local_action_PowerOn(arg=None): ...`
-
-### Local Events
-
-State this node emits (can be bound by other nodes):
-
-```python
-local_event_Status = LocalEvent({'schema': {'type': 'object'}})
-
-# Emit when state changes
-local_event_Status.emit({'power': 'On', 'volume': 50})
-```
-
-### Remote Bindings
-
-Connect to other nodes:
-
-```python
-# Call actions on other nodes
-remote_action_DisplayPower = RemoteAction()
-remote_action_DisplayPower.call('On')
-
-# Receive events from other nodes
-def remote_event_DisplayStatus(arg):
-    console.info('Display status: %s' % arg)
-```
-
-## Lifecycle Functions
-
-```python
 def main():
-    '''Called when node starts. Set up initial state.'''
-    console.info('Node starting...')
+    console.info('Node starting')
 
 @after_main
 def setup():
-    '''Called after main() and parameter loading. Configure connections.'''
-    tcp.setDest('%s:%s' % (param_ipAddress, param_port))
+    local_event_Status.emit('Ready')
 
 @at_cleanup
 def cleanup():
-    '''Called when node shuts down. Clean up resources.'''
-    tcp.close()
+    console.info('Node stopping')
 ```
 
-## Network Protocols
+Use schemas that match the values actions accept and events emit. Prefer explicit state variables updated by protocol callbacks over probing undocumented internals.
 
-TCP, UDP, and HTTP are available via the toolkit. See `references/toolkit-api.md` for complete documentation with examples.
+## References
 
-## Timers
+- Read [`references/jython-syntax.md`](references/jython-syntax.md) whenever writing language syntax, imports, exception handling, collection code, or standard-library calls.
+- Read [`references/toolkit-api.md`](references/toolkit-api.md) when using parameters, actions, events, timers, lifecycle decorators, network protocols, HTTP, processes, utilities, or node-state helpers.
+- Read [`references/patterns.md`](references/patterns.md) when implementing polling, health status, state arbitration, binary protocols, HTTP integrations, dynamic bindings, process control, chained operations, logging, or parameter validation.
 
-```python
-# Repeating timer (poll every 30 seconds)
-Timer(poll_status, 30)
+## Completion Check
 
-# One-time delayed call
-call(setup_connection, 5)
-
-# Stoppable timer
-status_timer = Timer(check_status, 60, stopped=True)
-status_timer.start()
-status_timer.stop()
-```
-
-## Console Logging
-
-```python
-console.log("Light gray - verbose/debug")
-console.info("Blue - informational")
-console.warn("Orange - warning")
-console.error("Red - error")
-```
-
-## Common Patterns
-
-### Device Control with Polling
-
-```python
-def tcp_received(data):
-    if 'POWER=' in data:
-        local_event_Status.emit({'power': data.split('=')[1]})
-
-tcp = TCP(received=tcp_received)
-
-def poll_status():
-    tcp.send('STATUS?\r\n')
-
-Timer(poll_status, 30)
-```
-
-### Status Monitoring
-
-```python
-local_event_Status = LocalEvent({'schema': {'type': 'object', 'properties': {
-    'level': {'type': 'integer'},
-    'message': {'type': 'string'}
-}}})
-
-_lastReceive = 0
-
-def statusCheck():
-    diff = (system_clock() - _lastReceive) / 1000.0
-    if diff > 90:
-        local_event_Status.emit({'level': 2, 'message': 'No response'})
-    else:
-        local_event_Status.emit({'level': 0, 'message': 'OK'})
-
-Timer(statusCheck, 60)
-```
-
-### Dynamic Action Creation
-
-```python
-def build_presets():
-    for preset in PRESET_NAMES:
-        create_local_action('Preset %s' % preset,
-            lambda arg, p=preset: activate_preset(p),
-            {'group': 'Presets', 'schema': {'type': 'null'}})
-```
-
-## Error Handling
-
-```python
-@local_action({})
-def riskyOperation(arg):
-    try:
-        result = perform_operation(arg)
-        local_event_Success.emit(result)
-    except Exception, e:
-        console.error('Operation failed: %s' % e)
-        local_event_Error.emit(str(e))
-```
-
-## Development Philosophy
-
-- **Simplicity First** - Keep code minimal and readable
-- **Maintainability > Cleverness** - Prefer explicit over implicit
-- **DRY** - Extract common patterns to helper functions
-- **Defensive Coding** - Handle network failures gracefully
+- Keep syntax compatible with Jython 2.5.
+- Confirm every toolkit symbol and option against the toolkit reference.
+- Emit event values that match their declared schemas.
+- Handle connection failure, malformed responses, and shutdown without leaving background work running.

@@ -2,6 +2,16 @@
 
 Comprehensive guide to troubleshooting and debugging Nodel nodes.
 
+## Contents
+
+- [Debugging workflow](#debugging-workflow)
+- [Common issues](#common-issues)
+- [Using eval for debugging](#using-eval-for-debugging)
+- [Using exec for testing](#using-exec-for-testing)
+- [Live log tailing](#live-log-tailing)
+- [Framework diagnostics](#framework-diagnostics)
+- [Restart and recovery](#restart-and-recovery)
+
 ## Debugging Workflow
 
 ### 1. Check Node Exists

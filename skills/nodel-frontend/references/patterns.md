@@ -2,6 +2,20 @@
 
 Common patterns and examples for building Nodel dashboards.
 
+## Contents
+
+- [Source selection dashboard](#source-selection-dashboard)
+- [Power and volume control](#power-and-volume-control)
+- [Admin lock pattern](#admin-lock-pattern)
+- [Multi-room dashboard](#multi-room-dashboard)
+- [Status overview](#status-overview)
+- [Dynamic controls](#dynamic-controls)
+- [Confirmation dialogs](#confirmation-dialogs)
+- [Visibility control](#visibility-control)
+- [Audio mixer layout](#audio-mixer-layout)
+- [Custom styling examples](#custom-styling-examples)
+- [Mobile-friendly layout](#mobile-friendly-layout)
+
 ## Source Selection Dashboard
 
 ```xml
@@ -320,19 +334,27 @@ When device capabilities are discovered at runtime:
 
 ### custom.js
 
+There is no `nodel-event` DOM event. The renderer adds `nodel-event` as a CSS class to elements with `data-event`, then `process_event` updates the rendered element directly. Observe the specific property the stock renderer changes, such as text or an image's `src`.
+
 ```javascript
 $(document).ready(function() {
-  // Refresh page periodically
-  setInterval(function() {
-    // Trigger status refresh
-  }, 30000);
+  var target = document.querySelector('[data-event="DeviceStatus"]');
+  if (!target) return;
 
-  // Handle custom keyboard shortcuts
-  $(document).keypress(function(e) {
-    if (e.key === 'r') {
-      // Refresh action
-    }
+  var lastValue;
+  function handleRenderedValue() {
+    var value = target.textContent;
+    if (value === lastValue) return;
+    lastValue = value;
+    console.log('DeviceStatus:', value);
+  }
+
+  new MutationObserver(handleRenderedValue).observe(target, {
+    childList: true,
+    characterData: true,
+    subtree: true
   });
+  handleRenderedValue();
 });
 ```
 

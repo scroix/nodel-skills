@@ -5,195 +5,59 @@ description: Interact with running Nodel instances via REST API - check node sta
 
 # Interacting with Running Nodel Instances
 
-## Quick Reference
+Inspect and manage live Nodel hosts through their REST API.
 
-**Common Base URL:** `http://localhost:8085` (the host tries its cached last port first, or 8085 when no port is configured or cached)
+## Workflow
+
+1. Identify the correct host and port. With no configured port, Nodel reuses its cached last port or falls back to `8085`.
+2. List nodes and confirm the exact target name before using a node-scoped endpoint.
+3. Read console, activity, parameters, actions, and events before mutating state.
+4. Test the narrowest safe action or diagnostic call, then re-read logs and state.
+5. Use restart, rename, deletion, script, parameter, binding, or file writes only when the requested change requires them.
+
+## Quick Start
+
+URL-encode node names in paths (`My Node` becomes `My%20Node`).
 
 ```bash
-# List all nodes
+# List local nodes
 curl http://localhost:8085/REST/nodes
 
-# Get node console logs
+# Read recent console entries
 curl "http://localhost:8085/REST/nodes/My%20Node/console?from=0&max=50"
 
-# Invoke an action
+# Invoke a string action
 curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
-  -H "Content-Type: application/json" -d '{"arg":"On"}'
-```
-
-**Important:** URL-encode node names with spaces (`%20`). See `references/rest-api.md` for all endpoints.
-
-## REST API Endpoints
-
-See `references/rest-api.md` for complete endpoint reference.
-
-### Host-Level Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/REST/nodes` | GET | Map of all nodes |
-| `/REST/allNodes` | GET | Discovered nodes on network |
-| `/REST/discovery` | GET | Discovery service state |
-| `/REST/nodeURLs` | GET | Advertised node URLs (`?filter=` optional) |
-| `/REST/nodeURLsForNode` | GET | Advertised URLs for one node (`?name=`) |
-| `/REST` | GET | Host metadata, including startup timestamp |
-| `/REST/logs` | GET | Framework logs |
-| `/REST/diagnostics` | GET | System diagnostics |
-| `/REST/recipes/list` | GET | Available node recipes |
-| `/REST/toolkit` | GET | Python toolkit reference |
-
-### Node-Level Endpoints
-
-Base: `/REST/nodes/{nodeName}/`
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/console` | GET | Console logs |
-| `/logs` | GET | Action/event activity |
-| `/actions` | GET | List actions |
-| `/actions/{name}/call` | POST | Invoke action |
-| `/events` | GET | List events |
-| `/events/{name}` | GET | Event metadata + last value |
-| `/params` | GET | Current parameters |
-| `/script/raw` | GET | Script source |
-| `/restart` | POST | Restart node |
-
-## Debugging Workflows
-
-### Check Node Health
-
-```bash
-# 1. Get console output
-curl "http://localhost:8085/REST/nodes/My%20Node/console?from=0&max=100"
-
-# 2. Look for error patterns in response
-# Console levels: info (blue), out (gray), warn (orange), err (red)
-
-# 3. Check action/event activity
-curl "http://localhost:8085/REST/nodes/My%20Node/logs?from=0&max=50"
-
-# 4. Inspect current parameters
-curl http://localhost:8085/REST/nodes/My%20Node/params
-```
-
-### Live Log Tailing (Long-Polling)
-
-```bash
-# Initial fetch - note the highest 'seq' value in response
-curl "http://localhost:8085/REST/nodes/My%20Node/console?from=0&max=50"
-
-# Poll for new logs (waits up to 5 seconds)
-curl "http://localhost:8085/REST/nodes/My%20Node/console?from=12345&max=50&timeout=5000"
-```
-
-Response format:
-```json
-[
-  {"seq": 12346, "timestamp": "2024-01-15T10:30:00", "console": "info", "comment": "Connected"},
-  {"seq": 12347, "timestamp": "2024-01-15T10:30:01", "console": "err", "comment": "Error message"}
-]
-```
-
-### Inspect and Test Actions
-
-```bash
-# List available actions
-curl http://localhost:8085/REST/nodes/My%20Node/actions
-
-# Test action - string argument
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/actions/Power/call" \
-  -H "Content-Type: application/json" -d '{"arg":"On"}'
-```
-
-See `references/debugging.md` for complete debugging workflows.
-
-### Evaluate Python Expressions
-
-```bash
-# Check variable value
-curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=param_ipAddress"
-
-# Check connection state (requires _isConnected variable set by TCP callbacks)
-curl "http://localhost:8085/REST/nodes/My%20Node/eval?expr=_isConnected"
-
-# Execute diagnostic code
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/exec" \
   -H "Content-Type: application/json" \
-  -d '{"code":"console.info(\"Connection state: %s\" % _isConnected)"}'
+  -d '{"arg":"On"}'
 ```
 
-## Common Issues
+## Safety and Response Rules
 
-### Node Not Responding
+- Inspect an action's metadata before choosing its argument shape.
+- Send JSON to service endpoints, including `{}` when a POST has no explicit payload.
+- Treat `/files/save` as the raw-file-content exception.
+- Use the previous ISO `started` timestamp with `hasRestarted` when waiting for a restart.
+- Require `confirm=true` for node removal and confirm the target name immediately beforehand.
+- Add `?trace` only when diagnosing serialization, Python, or unexpected server errors; routing and not-found failures deliberately omit stack traces.
+- Preserve unrelated nodes, parameters, bindings, scripts, and files.
 
-1. Check if node exists: `curl http://localhost:8085/REST/nodes`
-2. Check console for startup errors
-3. Verify parameters are configured
-4. Check network connectivity to device
+## Debugging Order
 
-### Action Not Working
+1. Confirm the node exists and inspect discovery when remote visibility matters.
+2. Read `console` for startup or protocol errors.
+3. Read action/event activity and current parameters.
+4. Inspect action and event metadata before invoking or evaluating anything.
+5. Use `eval` for a narrow expression and `exec` only for deliberate diagnostic code.
+6. Re-read the console after every active test.
 
-1. Check action exists: `curl .../actions`
-2. Verify argument format matches schema
-3. Check console for errors after calling
-4. Test with simple action first (Refresh, Status)
+## References
 
-### Connection Issues
+- Read [`references/rest-api.md`](references/rest-api.md) when choosing an endpoint, method, query parameter, payload shape, response, WebSocket path, or management operation.
+- Read [`references/debugging.md`](references/debugging.md) when diagnosing startup, discovery, connectivity, actions, events, timers, live logs, framework health, or restart recovery.
 
-1. Use `/eval` to check connection state
-2. Look for "disconnected" in console logs
-3. Verify IP/port parameters
-4. Test network connectivity from Nodel host
+## Completion Check
 
-## Node Management
-
-### Create Node from Recipe
-
-```bash
-# List recipes (returns objects with 'path', 'modified', etc.)
-curl http://localhost:8085/REST/recipes/list
-
-# Create node from a recipe path
-curl -X POST "http://localhost:8085/REST/newNode?base=nodel-official-recipes/PJLink" \
-  -H "Content-Type: application/json" \
-  -d '{"value":"New Node"}'
-```
-
-### Update Node Parameters
-
-```bash
-# Get current values
-curl http://localhost:8085/REST/nodes/My%20Node/params
-
-# Save new values
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/params/save" \
-  -H "Content-Type: application/json" \
-  -d '{"ipAddress": "192.168.1.100", "port": 9999}'
-```
-
-### Restart/Rename/Delete
-
-```bash
-# Restart
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/restart" \
-  -H "Content-Type: application/json" \
-  -d '{}'
-
-# Rename
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/rename" \
-  -H "Content-Type: application/json" \
-  -d '{"value":"New Name"}'
-
-# Delete (requires confirmation)
-curl -X POST "http://localhost:8085/REST/nodes/My%20Node/remove?confirm=true" \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-## Tips
-
-1. **URL-encode node names** - Spaces become `%20`
-2. **Use `?trace` for debugging** - Adds a stack trace to serialization, Python, and unexpected 500 responses; routing/not-found errors deliberately omit it
-3. **POST payloads** - Service endpoints use JSON (`-d '{}'` if no explicit payload); `/files/save` is the raw-file-content exception
-4. **Long-poll timeout** - Use 5000-10000ms for log tailing
-5. **Check restart completion** - Use `/hasRestarted?timestamp={url-encoded ISO timestamp}&timeout=5000`
+- Confirm the live response matches the expected shape rather than trusting HTTP status alone.
+- Confirm active tests create no new `err` console entries.
+- Re-read changed state after any mutation.
