@@ -2,6 +2,16 @@
 
 Complete reference for all Nodel REST API endpoints.
 
+## Contents
+
+- [Base URL](#base-url)
+- [Host-level endpoints](#host-level-endpoints)
+- [Node-level endpoints](#node-level-endpoints)
+- [WebSocket API](#websocket-api)
+- [Error responses](#error-responses)
+- [Common HTTP status codes](#common-http-status-codes)
+- [Query parameters](#query-parameters)
+
 ## Base URL
 
 Common: `http://localhost:8085`. With no configured port, the host first reuses its cached last port and otherwise tries 8085; an explicitly configured port takes precedence.

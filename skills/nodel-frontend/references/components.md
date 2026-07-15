@@ -2,6 +2,20 @@
 
 Complete reference for all Nodel frontend UI components.
 
+## Contents
+
+- [Layout components](#layout-components)
+- [Button components](#button-components)
+- [Switch components](#switch-components)
+- [Selection components](#selection-components)
+- [Range components](#range-components)
+- [Status components](#status-components)
+- [Text components](#text-components)
+- [Input components](#input-components)
+- [Media components](#media-components)
+- [Special components](#special-components)
+- [Shared attributes](#shared-attributes)
+
 ## Layout Components
 
 ### pages (Root Element)
@@ -138,11 +152,14 @@ Fixed footer at bottom. Footer renders `row` children.
 
 ```xml
 <button action='Power' arg='On' class='btn-success'>Turn On</button>
+
+<!-- Invoke several actions in order -->
+<button action='["Action1","Action2","Action3"]'>Multiple</button>
 ```
 
 | Attribute | Description |
 |-----------|-------------|
-| `action` | Action to invoke |
+| `action` | Action to invoke, or a JSON array of action names to invoke in order |
 | `arg` | Argument to pass |
 | `class` | CSS class (btn-default, btn-primary, btn-success, btn-warning, btn-danger) |
 | `confirm` | Require confirmation (`true`, `code` for PIN) |

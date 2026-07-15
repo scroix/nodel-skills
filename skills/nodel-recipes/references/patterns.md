@@ -2,6 +2,17 @@
 
 Reusable patterns for common device control scenarios.
 
+## Contents
+
+- [Device control with TCP](#device-control-with-tcp)
+- [Status monitoring](#status-monitoring)
+- [HTTP API integration](#http-api-integration)
+- [Dynamic actions and events](#dynamic-actionsevents)
+- [Process control](#process-control)
+- [Chained operations](#chained-operations)
+- [Logging levels](#logging-levels)
+- [Parameter validation](#parameter-validation)
+
 ## Device Control with TCP
 
 ### Basic Power Control

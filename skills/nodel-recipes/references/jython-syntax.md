@@ -2,6 +2,12 @@
 
 Nodel recipes run on the bundled Jython 2.5.4-rc1 runtime (Python 2.5 syntax on the JVM). This reference covers syntax differences from modern Python.
 
+## Contents
+
+- [Critical syntax differences](#critical-syntax-differences)
+- [Available built-ins](#available-built-ins)
+- [Common patterns](#common-patterns)
+
 ## Critical Syntax Differences
 
 ### Exception Handling

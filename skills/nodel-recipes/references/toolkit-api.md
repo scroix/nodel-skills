@@ -4,6 +4,19 @@ Complete reference for the Nodel Python toolkit available in node scripts.
 
 Toolkit signatures are verified against `nodel-jyhost/src/main/resources/org/nodel/jyhost/nodetoolkit.py`. Examples for the less obvious APIs cite the official Nodel recipe they were lifted or adapted from.
 
+## Contents
+
+- [Parameters](#parameters)
+- [Actions](#actions)
+- [Events](#events)
+- [Console logging](#console-logging)
+- [Timers](#timers)
+- [Network protocols](#network-protocols)
+- [Process management](#process-management)
+- [Utilities](#utilities)
+- [Lifecycle decorators](#lifecycle-decorators)
+- [Node state](#node-state)
+
 ## Parameters
 
 Define configurable values that appear in the node's web interface.
