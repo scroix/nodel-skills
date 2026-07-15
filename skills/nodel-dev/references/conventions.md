@@ -2,8 +2,9 @@
 
 ## MPL 2.0 license header
 
-Every Java source file carries the Mozilla Public License 2.0 notice as a
-comment block immediately *after* the `package` statement:
+Nodel's convention places the Mozilla Public License 2.0 notice as a comment
+block immediately *after* the `package` statement (most core files carry it;
+some legacy files don't — new files always should):
 
 ```java
 package org.nodel.core;
@@ -60,11 +61,13 @@ uses them as the routing table:
 ```java
 @Service(name = "logs", title = "Logs", genericClassA = LogEntry.class,
          desc = "Retrieves this node's general event/action log.")
-public LogEntry[] getLogs(
+public List<LogEntry> getLogs(
         @Param(name = "from", title = "From", desc = "The minimum sequence number.")
         long from,
         @Param(name = "max", title = "Max", desc = "The maximum number of rows to return.")
-        int max) { ... }
+        int max,
+        @Param(name = "timeout", title = "Timeout", desc = "How long to wait for new items in ms (default 0)")
+        int timeout) { ... }
 ```
 
 (from `org.nodel.host.BaseNode` — reachable as

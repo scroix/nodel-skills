@@ -95,8 +95,8 @@ One line each — full detail with file paths in `references/architecture.md`.
 
 Examples for each in `references/conventions.md`.
 
-- Every Java file carries the MPL 2.0 header immediately *after* the
-  `package` statement.
+- New Java files get the MPL 2.0 header immediately *after* the `package`
+  statement (most files carry it; some legacy ones don't).
 - Node/action/event names match case/space/punctuation-insensitively — never
   compare raw name strings; wrap in `SimpleName`.
 - Callbacks use the `org.nodel.Handler` interfaces with the null-safe static

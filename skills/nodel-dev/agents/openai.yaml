@@ -1,5 +1,5 @@
 interface:
-  display_name: "Nodel Platform Dev"
+  display_name: "Nodel Platform"
   short_description: "Build and test the Nodel platform source"
   icon_small: "./assets/icon-small.svg"
   icon_large: "./assets/icon-large.svg"

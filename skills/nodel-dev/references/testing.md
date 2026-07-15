@@ -41,8 +41,9 @@ By default the host is started with
 `-Dorg.nodel.discovery.impl='org.nodel.discovery.LocalAutoDNS;instance'`.
 `LocalAutoDNS` is an in-JVM discovery registry shipped as a **test fixture**
 of `nodel-framework` and put on the host classpath via the `discoveryFixture`
-configuration — it never ships in a production JAR. The suite fails fast if
-it didn't load.
+configuration — it never ships in a production JAR. Only the e2e suite fails
+fast if it didn't load (`TestBase.assertLocalDiscoveryActive()`); integration
+runs would silently fall back to multicast (a load failure only logs a WARN).
 
 To exercise real multicast discovery:
 
