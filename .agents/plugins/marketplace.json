@@ -1,0 +1,21 @@
+{
+  "name": "nodel-skills",
+  "interface": {
+    "displayName": "Nodel Skills"
+  },
+  "plugins": [
+    {
+      "name": "nodel",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/scroix/nodel-skills.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

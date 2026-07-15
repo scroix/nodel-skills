@@ -12,6 +12,13 @@ These skills follow the [Agent Skills](https://agentskills.io/home) specificatio
 npx skills add scroix/nodel-skills
 ```
 
+### Codex Plugin
+
+```bash
+codex plugin marketplace add scroix/nodel-skills
+codex plugin add nodel@nodel-skills
+```
+
 ### Claude Code Plugin
 
 ```bash
