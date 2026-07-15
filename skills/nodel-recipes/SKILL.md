@@ -1,6 +1,6 @@
 ---
 name: nodel-recipes
-description: Write Nodel node recipes (script.py) using Jython 2.5 - define actions, events, parameters, TCP/UDP/HTTP protocols, and device control logic. Use when creating or modifying Nodel scripts.
+description: Author or modify Nodel script.py recipes with the bundled Jython 2.5 runtime and Nodel toolkit. Use for recipe actions, events, parameters, timers, device protocols, automation, and integration logic. Do not use for Nodel platform source changes, live-host REST operations, or index.xml, CSS, and JavaScript dashboard work.
 ---
 
 # Nodel Recipe Development

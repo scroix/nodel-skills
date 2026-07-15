@@ -1,6 +1,6 @@
 ---
 name: nodel-frontend
-description: Build custom frontends and dashboards for Nodel nodes using index.xml, custom.css, custom.js, and XSL templates. Use when developing UI components for Nodel recipes.
+description: Build or modify Nodel node dashboards with content/index.xml, CSS, JavaScript, and Nodel XSL components. Use for dashboard layouts, controls, action and event bindings, responsive styling, and browser-side behavior. Do not use for generic web apps, script.py recipe logic, live-host REST operations, or Nodel platform source changes.
 ---
 
 # Nodel Frontend Development
