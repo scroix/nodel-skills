@@ -19,8 +19,8 @@ not part of the Gradle build.
 
 ## Building
 
-Requires JDK 11+ on PATH; always build through the wrapper (`./gradlew`,
-Gradle 8.14.5).
+Requires JDK 11+ on PATH; always build through the wrapper (`./gradlew` —
+currently Gradle 8.14.5, pinned in `gradle/wrapper/gradle-wrapper.properties`).
 
 ```bash
 ./gradlew build          # full build INCLUDING the whole test suite

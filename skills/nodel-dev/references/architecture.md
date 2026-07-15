@@ -96,9 +96,10 @@ lifecycles; `org.nodel.host.BaseNode` holds the host-agnostic node model
 
 ## Web UI build pipeline (nodel-webui-js)
 
-`nodel-webui-js/build.gradle`, plugin `com.github.node-gradle.node` 7.0.2:
+`nodel-webui-js/build.gradle`, plugin `com.github.node-gradle.node`:
 
-1. `npmInstall` — downloads Node.js **20.12.0** into `build/nodejs`, runs npm
+1. `npmInstall` — downloads the pinned Node.js version into `build/nodejs`
+   (see the `node {}` block), runs npm
    with `--legacy-peer-deps`; a `doLast` deletes
    `node_modules/bootstrap/node_modules` so grunt-twbs reinstalls cleanly.
 2. `gruntRun` (`NpxTask`) — runs `grunt` over `src/` (JS, LESS themes, XSL

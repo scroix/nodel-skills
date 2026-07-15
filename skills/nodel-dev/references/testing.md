@@ -1,7 +1,8 @@
 # Nodel Test Infrastructure
 
 All host tests live in `nodel-jyhost/src/test/java/org/nodel/` and run with
-JUnit 5 + Playwright for Java 1.52.0 (Chromium). Task wiring is in
+JUnit 5 + Playwright for Java (Chromium; version pinned in
+`nodel-jyhost/build.gradle`). Task wiring is in
 `nodel-jyhost/build.gradle`; the human-oriented walkthrough is the TESTING
 section of the repo's `BUILDING.md`.
 
