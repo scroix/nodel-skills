@@ -222,7 +222,7 @@ curl ".../eval?expr=local_event_Status.getArg()"
 
 # Check list contents
 curl ".../eval?expr=len(SOURCES)"
-curl ".../eval?expr=SOURCES[0] if SOURCES else None"
+curl ".../eval?expr=SOURCES%5B0%5D%20if%20SOURCES%20else%20None"
 
 # Check global state
 curl ".../eval?expr=_lastReceive"

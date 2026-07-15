@@ -26,3 +26,13 @@ npx skills add scroix/nodel-skills
 | [`nodel-recipes`](skills/nodel-recipes/) | Write Nodel node recipes using Jython 2.5 with the toolkit API |
 | [`nodel-use`](skills/nodel-use/) | Interact with running Nodel instances via REST API |
 | [`nodel-frontend`](skills/nodel-frontend/) | Build custom frontends and dashboards for Nodel nodes |
+
+## Validation
+
+Run the disposable-host documentation and renderer harness with:
+
+```bash
+tests/validate.sh
+```
+
+See [`tests/README.md`](tests/README.md) for prerequisites, overrides, and the exact validation scope.
