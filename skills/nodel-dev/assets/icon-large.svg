@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Nodel Platform</title>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#24303C"/>
+  <path d="m56 68 72-28 72 28" fill="none" stroke="#8492A5" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="56" cy="68" r="16" fill="#8492A5"/>
+  <circle cx="128" cy="40" r="16" fill="#C2D867"/>
+  <circle cx="200" cy="68" r="16" fill="#8492A5"/>
+  <path d="M100 116 60 156l40 40" fill="none" stroke="#8492A5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m156 116 40 40-40 40" fill="none" stroke="#8492A5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="156" r="18" fill="none" stroke="#C2D867" stroke-width="10"/>
+  <path d="M128 130v-10M128 182v10M154 156h10M102 156h-10" fill="none" stroke="#C2D867" stroke-width="10" stroke-linecap="round"/>
+</svg>

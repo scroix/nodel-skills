@@ -33,6 +33,7 @@ codex plugin add nodel@nodel-skills
 | [`nodel-recipes`](skills/nodel-recipes/) | Write Nodel node recipes using Jython 2.5 with the toolkit API |
 | [`nodel-use`](skills/nodel-use/) | Interact with running Nodel instances via REST API |
 | [`nodel-frontend`](skills/nodel-frontend/) | Build custom frontends and dashboards for Nodel nodes |
+| [`nodel-dev`](skills/nodel-dev/) | Build, test, and modify the Nodel platform source itself |
 
 ## Validation
 
