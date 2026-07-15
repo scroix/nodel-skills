@@ -1,8 +1,8 @@
 # Nodel API Documentation Verification
 
-Verified against `/Users/scroix/sandbox/nodel/host/nodel-scroix` at commit `83a92152598edd3013907ab83de4c42730422139` (`dev`). Source paths below are relative to that repository.
+Verified against [`museumsvictoria/nodel` at commit `83a92152598edd3013907ab83de4c42730422139`](https://github.com/museumsvictoria/nodel/commit/83a92152598edd3013907ab83de4c42730422139) (`dev`). Source paths below are relative to that repository.
 
-Official recipe examples are additionally verified against `museumvictoria/nodel-recipes` at commit `7ee37e40b24c21bd4a26efa60857fe57bc2d0f54`. Evidence from that repository is prefixed with `nodel-recipes/`.
+Official recipe examples are additionally verified against [`museumvictoria/nodel-recipes` at commit `7ee37e40b24c21bd4a26efa60857fe57bc2d0f54`](https://github.com/museumvictoria/nodel-recipes/commit/7ee37e40b24c21bd4a26efa60857fe57bc2d0f54). Evidence from that repository is prefixed with `nodel-recipes/`.
 
 The documentation ranges are inclusive and refer to the files in this commit of `nodel-skills`. Every Nodel function, returned-object method, component tag, component attribute, REST endpoint, and JavaScript hook asserted in `skills/*/SKILL.md` and `skills/*/references/*.md` is covered by a row below. Repeated uses in pattern files are still listed so that no API-bearing documentation line relies on an implicit citation.
 
