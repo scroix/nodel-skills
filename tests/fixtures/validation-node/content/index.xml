@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="v1/index.xsl"?>
+<pages title="Validation Harness" css="css/custom.css" js="js/custom.js">
+  <header>
+    <nodel type="nav"/>
+    <input type="checkbox" event="AdminMode" action="AdminMode">Admin</input>
+    <button action="Refresh">Refresh</button>
+  </header>
+  <page title="Controls">
+    <row>
+      <column sm="6">
+        <group>
+          <title>Core controls</title>
+          <subtitle>Documented action and event widgets</subtitle>
+          <buttongroup>
+            <button action="Power" arg="On" class="btn-success">On</button>
+            <button action="Power" arg="Off">Off</button>
+          </buttongroup>
+          <switch event="Power" action="Power"/>
+          <partialswitch event="Power" action="Power"/>
+          <pills event="Source" action="Source">
+            <pill value="HDMI1">HDMI 1</pill>
+            <pill value="HDMI2">HDMI 2</pill>
+          </pills>
+          <select event="Source" action="Source">
+            <item value="HDMI1">HDMI 1</item>
+            <item value="HDMI2">HDMI 2</item>
+          </select>
+          <range event="Volume" action="Volume" min="0" max="100" nudge="5"/>
+        </group>
+      </column>
+      <column sm="6">
+        <title>Status components</title>
+        <status event="DeviceStatus">
+          <badge event="Power"/>
+          Fixture status
+        </status>
+        <meter event="AudioLevel"/>
+        <field event="CurrentValue"/>
+        <panel height="80" event="LongText"/>
+        <text>The fixture uses components documented by nodel-frontend.</text>
+        <qrcode text="https://nodel.io" height="96" help="Nodel"/>
+        <button action="Refresh">
+          <icon lib="fa" type="refresh" style="fas"/>
+          Refresh status
+        </button>
+        <gap value="12"/>
+      </column>
+    </row>
+  </page>
+  <pagegroup title="More">
+    <page title="Details">
+      <row>
+        <column sm="12"><text>Page groups render correctly.</text></column>
+      </row>
+    </page>
+  </pagegroup>
+  <footer>
+    <row>
+      <column sm="12"><text>Validation fixture</text></column>
+    </row>
+  </footer>
+</pages>

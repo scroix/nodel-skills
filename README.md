@@ -27,3 +27,13 @@ npx skills add scroix/nodel-skills
 | [`nodel-use`](skills/nodel-use/) | Interact with running Nodel instances via REST API |
 | [`nodel-frontend`](skills/nodel-frontend/) | Build custom frontends and dashboards for Nodel nodes |
 | [`nodel-dev`](skills/nodel-dev/) | Develop the Nodel platform source itself - build, test, and architecture |
+
+## Validation
+
+Run the disposable-host documentation and renderer harness with:
+
+```bash
+tests/validate.sh
+```
+
+See [`tests/README.md`](tests/README.md) for prerequisites, overrides, and the exact validation scope.
